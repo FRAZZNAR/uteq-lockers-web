@@ -60,7 +60,7 @@ const LoginPage = () => {
         </div>
         <div className="lp-stats">
           <div className="lp-stat">
-            <span className="lp-stat-n">3</span>
+            <span className="lp-stat-n">2</span>
             <span className="lp-stat-l">Edificios</span>
           </div>
           <div className="lp-stat">
