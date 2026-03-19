@@ -34,11 +34,18 @@ const RootRedirect = () => {
 }
 
 const App = () => {
-  const init = useAuthStore((s) => s.init)
 
-  // Recuperar sesión guardada al montar la app
-  useEffect(() => { init() }, [init])
+  const hasHydrated = useAuthStore((s) => s._hasHydrated)
 
+  // Espera a que persist termine de leer el localStorage
+  if (!hasHydrated) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+  
   return (
     <BrowserRouter>
       <Suspense fallback={<Cargando />}>

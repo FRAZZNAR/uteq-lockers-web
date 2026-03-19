@@ -7,6 +7,7 @@ import type {
   TarjetaRfid, EnrolarTarjetaDto,
   GenerarCodigoDto, Dispositivo,
 } from '../types'
+import useAuthStore from '../stores/authStore'
 
 // ── Instancia Axios ──────────────────────────────────────────────────
 const api = axios.create({
@@ -16,12 +17,9 @@ const api = axios.create({
 
 // Interceptor request: adjunta JWT
 api.interceptors.request.use((config) => {
-  const raw = localStorage.getItem('auth')
-  if (raw) {
-    const auth: AuthState = JSON.parse(raw)
-    if (auth.token) {
-      config.headers.Authorization = `Bearer ${auth.token}`
-    }
+  const token = useAuthStore.getState().token
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
