@@ -39,7 +39,7 @@ const LoginPage = () => {
           <Title level={3} style={{ color: '#003087', margin: '8px 0 0' }}>
             UTEQ Lockers
           </Title>
-          <Text type="secondary">Universidad Tecnológica de Querétaro</Text>
+          <Text type="secondary">Universidad Tecnológica del Estado de Querétaro</Text>
         </div>
 
         <Form

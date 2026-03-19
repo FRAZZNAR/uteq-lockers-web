@@ -76,7 +76,7 @@ const AlumnoLayout = () => {
         </Content>
 
         <Footer style={{ textAlign: 'center', color: '#999' }}>
-          UTEQ Lockers © 2026 — Universidad Tecnológica de Querétaro
+          UTEQ Lockers © 2026 — Universidad Tecnológica del Estado de Querétaro
         </Footer>
       </Layout>
     </Layout>

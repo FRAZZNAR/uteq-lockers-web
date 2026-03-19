@@ -1,6 +1,6 @@
 # UTEQ Lockers Web
 
-Frontend del Sistema de Monitoreo de Lockers Universitarios — Universidad Tecnológica de Querétaro.
+Frontend del Sistema de Monitoreo de Lockers Universitarios — Universidad Tecnológica del Estado de Querétaro.
 
 ## Stack
 - React 19 + TypeScript 5 | Vite 7 (puerto: 7130) | Bun
