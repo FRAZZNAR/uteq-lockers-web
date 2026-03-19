@@ -1,44 +1,50 @@
 import { useState } from 'react'
-import { Layout, Menu, Button, Typography, Space, theme } from 'antd'
+import { Button, Typography } from 'antd'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
   DashboardOutlined, LockOutlined, UserSwitchOutlined,
   TeamOutlined, CreditCardOutlined, HistoryOutlined,
   FilePdfOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
+  DownOutlined as ChevronDownOutlined,
 } from '@ant-design/icons'
 import useAuth from '../../hooks/useAuth'
+import './AdminLayout.css'
 
-const { Header, Sider, Content, Footer } = Layout
 const { Text } = Typography
+
+interface MenuItem {
+  key: string
+  icon: React.ReactNode
+  label: string
+  children?: { key: string; label: string }[]
+}
+
+const menuItems: MenuItem[] = [
+  { key: '/admin/dashboard',    icon: <DashboardOutlined />,  label: 'Dashboard' },
+  {
+    key: 'lockers',
+    icon: <LockOutlined />,
+    label: 'Lockers',
+    children: [
+      { key: '/admin/lockers?edificio=H', label: 'Edificio H' },
+      { key: '/admin/lockers?edificio=K', label: 'Edificio K' },
+    ],
+  },
+  { key: '/admin/asignaciones', icon: <UserSwitchOutlined />, label: 'Asignaciones' },
+  { key: '/admin/usuarios',     icon: <TeamOutlined />,       label: 'Usuarios' },
+  { key: '/admin/tarjetas',     icon: <CreditCardOutlined />, label: 'Tarjetas RFID' },
+  { key: '/admin/accesos',      icon: <HistoryOutlined />,    label: 'Historial Accesos' },
+  { key: '/admin/reportes',     icon: <FilePdfOutlined />,    label: 'Reportes' },
+]
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const [lockersOpen, setLockersOpen] = useState(true)
   const navigate = useNavigate()
   const location = useLocation()
   const { usuario, logout } = useAuth()
-  const { token: { colorBgContainer } } = theme.useToken()
 
-  const menuItems = [
-    { key: '/admin/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
-    {
-      key: 'lockers',
-      icon: <LockOutlined />,
-      label: 'Lockers',
-      children: [
-        { key: '/admin/lockers?edificio=H', label: 'Edificio H' },
-        { key: '/admin/lockers?edificio=K', label: 'Edificio K' },
-      ],
-    },
-    { key: '/admin/asignaciones', icon: <UserSwitchOutlined />, label: 'Asignaciones' },
-    { key: '/admin/usuarios', icon: <TeamOutlined />, label: 'Usuarios' },
-    { key: '/admin/tarjetas', icon: <CreditCardOutlined />, label: 'Tarjetas RFID' },
-    { key: '/admin/accesos', icon: <HistoryOutlined />, label: 'Historial Accesos' },
-    { key: '/admin/reportes', icon: <FilePdfOutlined />, label: 'Reportes' },
-  ]
-
-  const selectedKey = location.pathname
-
-  const handleMenuClick = ({ key }: { key: string }) => {
+  const handleNav = (key: string) => {
     if (!key.startsWith('lockers')) navigate(key)
   }
 
@@ -47,60 +53,151 @@ const AdminLayout = () => {
     navigate('/login')
   }
 
+  const isActive = (key: string) =>
+    location.pathname + location.search === key ||
+    location.pathname === key
+
+  const isGroupActive = (children: { key: string }[]) =>
+    children.some(c => isActive(c.key))
+
+  // Nombre de la página actual para el header breadcrumb
+  const currentPage = (() => {
+    for (const item of menuItems) {
+      if (item.children) {
+        const child = item.children.find(c => isActive(c.key))
+        if (child) return `${item.label} / ${child.label}`
+      }
+      if (isActive(item.key)) return item.label
+    }
+    return 'Dashboard'
+  })()
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} width={220}>
-        <div style={{
-          height: 64, display: 'flex', alignItems: 'center',
-          justifyContent: 'center', padding: '0 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <LockOutlined style={{ color: '#1890ff', fontSize: 22 }} />
+    <div className="al-layout">
+
+      {/* ── Sidebar ── */}
+      <aside className={`al-sider ${collapsed ? 'al-sider-collapsed' : ''}`}>
+
+        {/* Logo */}
+        <div className="al-logo">
+          <div className="al-logo-icon">
+            <LockOutlined />
+          </div>
           {!collapsed && (
-            <Text strong style={{ color: 'white', marginLeft: 10, fontSize: 15 }}>
-              UTEQ Lockers
-            </Text>
+            <div className="al-logo-text">
+              <span className="al-logo-main">UTEQ</span>
+              <span className="al-logo-sub">Lockers</span>
+            </div>
           )}
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          defaultOpenKeys={['lockers']}
-          items={menuItems}
-          onClick={handleMenuClick}
-          style={{ borderRight: 0 }}
-        />
-      </Sider>
 
-      <Layout>
-        <Header style={{
-          padding: '0 24px', background: colorBgContainer,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderBottom: '1px solid #f0f0f0'
-        }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-          />
-          <Space>
-            <Text>{usuario?.nombre} {usuario?.apellido}</Text>
-            <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
-              Salir
-            </Button>
-          </Space>
-        </Header>
+        {/* Nav */}
+        <nav className="al-nav">
+          {menuItems.map((item) => {
+            if (item.children) {
+              const groupActive = isGroupActive(item.children)
+              return (
+                <div key={item.key} className="al-nav-group">
+                  <button
+                    className={`al-nav-item al-nav-group-btn ${groupActive ? 'al-nav-active' : ''}`}
+                    onClick={() => !collapsed && setLockersOpen(o => !o)}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <span className="al-nav-icon">{item.icon}</span>
+                    {!collapsed && (
+                      <>
+                        <span className="al-nav-label">{item.label}</span>
+                        <span className={`al-nav-chevron ${lockersOpen ? 'al-chevron-open' : ''}`}>
+                          <ChevronDownOutlined />
+                        </span>
+                      </>
+                    )}
+                  </button>
+                  {!collapsed && lockersOpen && (
+                    <div className="al-nav-children">
+                      {item.children.map(child => (
+                        <button
+                          key={child.key}
+                          className={`al-nav-child ${isActive(child.key) ? 'al-nav-child-active' : ''}`}
+                          onClick={() => handleNav(child.key)}
+                        >
+                          <span className="al-child-dot" />
+                          {child.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
 
-        <Content style={{ margin: '24px 16px', padding: 24, background: colorBgContainer, minHeight: 280 }}>
+            return (
+              <button
+                key={item.key}
+                className={`al-nav-item ${isActive(item.key) ? 'al-nav-active' : ''}`}
+                onClick={() => handleNav(item.key)}
+                title={collapsed ? item.label : undefined}
+              >
+                <span className="al-nav-icon">{item.icon}</span>
+                {!collapsed && <span className="al-nav-label">{item.label}</span>}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* User card */}
+        <div className="al-user">
+          <div className="al-user-avatar">
+            {usuario?.nombre?.[0] ?? 'A'}{usuario?.apellido?.[0] ?? ''}
+          </div>
+          {!collapsed && (
+            <div className="al-user-info">
+              <span className="al-user-name">{usuario?.nombre} {usuario?.apellido}</span>
+              <span className="al-user-role">Administrador</span>
+            </div>
+          )}
+        </div>
+
+      </aside>
+
+      {/* ── Main ── */}
+      <div className="al-main">
+
+        {/* Header */}
+        <header className="al-header">
+          <div className="al-header-left">
+            <button
+              className="al-collapse-btn"
+              onClick={() => setCollapsed(c => !c)}
+              aria-label="Toggle sidebar"
+            >
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </button>
+            <div className="al-breadcrumb">
+              <span className="al-breadcrumb-root">Admin</span>
+              <span className="al-breadcrumb-sep">/</span>
+              <span className="al-breadcrumb-current">{currentPage}</span>
+            </div>
+          </div>
+
+          <button className="al-logout-btn" onClick={handleLogout}>
+            <LogoutOutlined />
+            <span>Salir</span>
+          </button>
+        </header>
+
+        {/* Content */}
+        <main className="al-content">
           <Outlet />
-        </Content>
+        </main>
 
-        <Footer style={{ textAlign: 'center', color: '#999' }}>
+        {/* Footer */}
+        <footer className="al-footer">
           UTEQ Lockers © 2026 — Universidad Tecnológica de Querétaro
-        </Footer>
-      </Layout>
-    </Layout>
+        </footer>
+
+      </div>
+    </div>
   )
 }
 

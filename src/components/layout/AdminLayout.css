@@ -1,0 +1,404 @@
+/* ══════════════════════════════════════════════
+   UTEQ Admin Layout
+   ══════════════════════════════════════════════ */
+
+:root {
+  --uteq-navy:    #242B57;
+  --uteq-blue:    #003B71;
+  --uteq-accent:  #7aaee0;
+  --uteq-white:   #ffffff;
+  --uteq-surface: #f9fafb;
+  --uteq-border:  #e5e7eb;
+  --uteq-muted:   #888888;
+  --uteq-hint:    #aaaaaa;
+}
+
+/* ── Root layout ── */
+.al-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--uteq-surface);
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════════ */
+.al-sider {
+  width: 220px;
+  min-width: 220px;
+  background: var(--uteq-navy);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.22s ease, min-width 0.22s ease;
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+}
+
+.al-sider-collapsed {
+  width: 64px;
+  min-width: 64px;
+}
+
+/* ── Logo ── */
+.al-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 56px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.al-logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(122,174,224,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--uteq-accent);
+  flex-shrink: 0;
+}
+
+.al-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.al-logo-main {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--uteq-white);
+  letter-spacing: 0.06em;
+}
+
+.al-logo-sub {
+  font-size: 11px;
+  color: rgba(122,174,224,0.65);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* ── Nav ── */
+.al-nav {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.al-nav::-webkit-scrollbar { display: none; }
+
+/* Item base */
+.al-nav-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.al-nav-item:hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.9);
+}
+
+/* Item activo */
+.al-nav-active {
+  background: rgba(122,174,224,0.15) !important;
+  color: var(--uteq-accent) !important;
+}
+
+.al-nav-active .al-nav-icon { color: var(--uteq-accent); }
+
+/* Ícono */
+.al-nav-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.al-nav-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron del grupo */
+.al-nav-chevron {
+  font-size: 11px;
+  opacity: 0.5;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.al-chevron-open {
+  transform: rotate(180deg);
+}
+
+/* Grupo Lockers */
+.al-nav-group { display: flex; flex-direction: column; }
+
+.al-nav-group-btn { justify-content: flex-start; }
+
+/* Hijos del grupo */
+.al-nav-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 2px 30px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+
+.al-nav-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.al-nav-child:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+}
+
+.al-nav-child-active {
+  color: var(--uteq-accent) !important;
+  background: rgba(122,174,224,0.1) !important;
+}
+
+.al-child-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.al-nav-child-active .al-child-dot { opacity: 1; }
+
+/* ── User card (bottom) ── */
+.al-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.al-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(122,174,224,0.22);
+  color: var(--uteq-accent);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.al-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.al-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.al-user-role {
+  font-size: 10px;
+  color: rgba(122,174,224,0.55);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════
+   MAIN AREA
+   ══════════════════════════════════════════════ */
+.al-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.al-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--uteq-white);
+  border-bottom: 1px solid var(--uteq-border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.al-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Botón collapse */
+.al-collapse-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--uteq-border);
+  background: var(--uteq-surface);
+  color: var(--uteq-muted);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.al-collapse-btn:hover {
+  background: var(--uteq-navy);
+  color: var(--uteq-accent);
+  border-color: var(--uteq-navy);
+}
+
+/* Breadcrumb */
+.al-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.al-breadcrumb-root {
+  color: var(--uteq-hint);
+  font-weight: 400;
+}
+
+.al-breadcrumb-sep {
+  color: var(--uteq-border);
+}
+
+.al-breadcrumb-current {
+  color: var(--uteq-blue);
+  font-weight: 600;
+}
+
+/* Botón logout */
+.al-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--uteq-border);
+  background: transparent;
+  color: var(--uteq-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.al-logout-btn:hover {
+  background: #fff1f0;
+  color: #ff4d4f;
+  border-color: #ffccc7;
+}
+
+/* ── Content ── */
+.al-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* ── Footer ── */
+.al-footer {
+  text-align: center;
+  padding: 14px 24px;
+  font-size: 12px;
+  color: var(--uteq-hint);
+  border-top: 1px solid var(--uteq-border);
+  background: var(--uteq-white);
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .al-sider {
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+  }
+
+  .al-sider-collapsed {
+    width: 0;
+    min-width: 0;
+  }
+
+  .al-content {
+    padding: 16px;
+  }
+}
