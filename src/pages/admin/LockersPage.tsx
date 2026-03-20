@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Table, Button, Tabs, Space, Select, Input, Tag, Modal, Form,
-  message, Popconfirm, Card, Alert } from 'antd'
+  message, Card, Alert } from 'antd'
 import { PlusOutlined, WifiOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import api from '../../services/api'
@@ -82,16 +82,6 @@ const LockersPage = () => {
     }
   }
 
-  const eliminar = async (id: string) => {
-    try {
-      await api.lockers.eliminar(id)
-      message.success('Locker eliminado')
-      cargar()
-    } catch {
-      message.error('Error al eliminar')
-    }
-  }
-
   const cambiarEstado = async (id: string, estado: string) => {
     try {
       await api.lockers.cambiarEstado(id, estado)
@@ -106,8 +96,8 @@ const LockersPage = () => {
     { title: 'N°', dataIndex: 'numero', key: 'numero', width: 60 },
     { title: 'Serie', dataIndex: 'numeroSerie', key: 'serie' },
     { title: 'Edificio', dataIndex: 'edificioNombre', key: 'edificio', width: 80 },
-    { title: 'Piso', dataIndex: 'pisoNumero', key: 'piso', width: 60,
-      render: (v: number) => `Piso ${v}` },
+    { title: 'Piso', dataIndex: 'pisoDescripcion', key: 'piso', width: 120,
+      render: (v?: string) => v ?? '—' },
     { title: 'Estado', dataIndex: 'estado', key: 'estado',
       render: (v: string) => <StatusBadge estado={v} /> },
     { title: 'Dispositivo', key: 'dispositivo',
@@ -122,18 +112,13 @@ const LockersPage = () => {
     {
       title: 'Acciones', key: 'acciones',
       render: (_, r) => (
-        <Space size="small">
-          <Select
-            size="small" value={r.estado} style={{ width: 130 }}
-            onChange={(v) => cambiarEstado(r.id, v)}
-          >
-            <Option value="Disponible">Disponible</Option>
-            <Option value="Mantenimiento">Mantenimiento</Option>
-          </Select>
-          <Popconfirm title="¿Eliminar?" onConfirm={() => eliminar(r.id)} okText="Sí">
-            <Button size="small" danger>Eliminar</Button>
-          </Popconfirm>
-        </Space>
+        <Select
+          size="small" value={r.estado} style={{ width: 130 }}
+          onChange={(v) => cambiarEstado(r.id, v)}
+        >
+          <Option value="Disponible">Disponible</Option>
+          <Option value="Mantenimiento">Mantenimiento</Option>
+        </Select>
       ),
     },
   ]
@@ -183,7 +168,7 @@ const LockersPage = () => {
             <Select placeholder="Seleccionar piso">
               {pisos.map((p) => (
                 <Option key={p.id} value={p.id}>
-                  Edificio {p.edificioNombre} — Piso {p.numero}
+                  Edificio {p.edificioNombre} — {p.descripcion ?? `Piso ${p.numero}`}
                 </Option>
               ))}
             </Select>
@@ -209,7 +194,7 @@ const LockersPage = () => {
               <Select placeholder="Seleccionar locker" showSearch>
                 {lockers.map((l) => (
                   <Option key={l.id} value={l.id}>
-                    {l.numeroSerie} (Edificio {l.edificioNombre} · Piso {l.pisoNumero})
+                    {l.numeroSerie} (Edificio {l.edificioNombre} · {l.pisoDescripcion ?? `Piso ${l.pisoNumero}`})
                   </Option>
                 ))}
               </Select>

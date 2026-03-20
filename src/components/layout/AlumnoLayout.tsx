@@ -2,15 +2,16 @@ import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
   LockOutlined, MailOutlined, HistoryOutlined,
-  LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
+  LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, BellOutlined,
 } from '@ant-design/icons'
 import useAuth from '../../hooks/useAuth'
 import './AdminLayout.css'   // ← reutiliza el mismo CSS
 
 const menuItems = [
-  { key: '/alumno/mi-locker',        icon: <LockOutlined />,   label: 'Mi Locker' },
-  { key: '/alumno/solicitar-codigo', icon: <MailOutlined />,   label: 'Solicitar Código' },
+  { key: '/alumno/mi-locker',        icon: <LockOutlined />,    label: 'Mi Locker' },
+  { key: '/alumno/solicitar-codigo', icon: <MailOutlined />,    label: 'Solicitar Código' },
   { key: '/alumno/historial',        icon: <HistoryOutlined />, label: 'Historial' },
+  { key: '/alumno/avisos',           icon: <BellOutlined />,    label: 'Avisos' },
 ]
 
 const AlumnoLayout = () => {

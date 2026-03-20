@@ -6,6 +6,7 @@ import type {
   Asignacion, CrearAsignacionDto,
   TarjetaRfid, EnrolarTarjetaDto,
   GenerarCodigoDto, Dispositivo,
+  Aviso, CrearAvisoDto,
 } from '../types'
 import useAuthStore from '../stores/authStore'
 
@@ -155,6 +156,18 @@ const dispositivos = {
     api.delete<ServiceResponse<boolean>>(`/dispositivos/${id}`),
 }
 
+// ── Avisos ────────────────────────────────────────────────────────────
+const avisos = {
+  listar: () =>
+    api.get<ServiceResponse<Aviso[]>>('/avisos'),
+  misAvisos: () =>
+    api.get<ServiceResponse<Aviso[]>>('/avisos/mis-avisos'),
+  crear: (dto: CrearAvisoDto) =>
+    api.post<ServiceResponse<Aviso>>('/avisos', dto),
+  marcarCumplido: (id: string) =>
+    api.patch<ServiceResponse<boolean>>(`/avisos/${id}/cumplido`),
+}
+
 // ── Reportes ──────────────────────────────────────────────────────────
 const reportes = {
   ocupacion: () =>
@@ -201,5 +214,6 @@ export default {
   accesos,
   dispositivos,
   reportes,
+  avisos,
   dashboard,
 }

@@ -76,7 +76,7 @@ const AsignacionesPage = () => {
   const columnas: ColumnsType<Asignacion> = [
     {
       title: 'Locker', key: 'locker',
-      render: (_, r) => `Edif. ${r.edificioNombre} · Piso ${r.pisoNumero} · #${r.lockerNumero}`,
+      render: (_, r) => `Edif. ${r.edificioNombre} · ${r.pisoDescripcion ?? `Piso ${r.pisoNumero}`} · #${r.lockerNumero}`,
     },
     {
       title: 'Alumno', key: 'alumno',
@@ -146,7 +146,7 @@ const AsignacionesPage = () => {
               }>
               {lockersDisp.map((l) => (
                 <Option key={l.id} value={l.id}>
-                  {l.numeroSerie} — Edif. {l.edificioNombre} Piso {l.pisoNumero}
+                  {l.numeroSerie} — Edif. {l.edificioNombre} {l.pisoDescripcion ?? `Piso ${l.pisoNumero}`}
                 </Option>
               ))}
             </Select>

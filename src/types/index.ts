@@ -52,6 +52,7 @@ export interface Asignacion {
   lockerNumero: number
   edificioNombre: string
   pisoNumero: number
+  pisoDescripcion?: string
   estudianteId: string
   estudianteNombre: string
   estudianteMatricula: string
@@ -65,6 +66,7 @@ export interface Locker {
   id: string
   pisoId: string
   pisoNumero: number
+  pisoDescripcion?: string
   edificioId: string
   edificioNombre: string
   numero: number
@@ -136,6 +138,28 @@ export interface Dispositivo {
   pisoNumero: number
   ultimaConexion?: string
   estado: EstadoDispositivo
+}
+
+export interface Aviso {
+  id: string
+  asignacionId: string
+  lockerNumeroSerie: string
+  lockerNumero: number
+  edificioNombre: string
+  pisoDescripcion?: string
+  estudianteNombre: string
+  estudianteMatricula: string
+  estudianteEmail: string
+  mensaje: string
+  fechaLimite: string
+  estado: 'Pendiente' | 'Cumplido'
+  creadoEn: string
+}
+
+export interface CrearAvisoDto {
+  asignacionId: string
+  mensaje?: string
+  diasLimite: number
 }
 
 export interface PaginatedResponse<T> {

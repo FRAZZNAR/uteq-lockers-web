@@ -54,7 +54,7 @@ const MiLockerPage = () => {
       >
         <Descriptions column={1} bordered size="small">
           <Descriptions.Item label="Edificio">{asignacion.edificioNombre}</Descriptions.Item>
-          <Descriptions.Item label="Piso">{asignacion.pisoNumero}</Descriptions.Item>
+          <Descriptions.Item label="Piso">{asignacion.pisoDescripcion ?? `Piso ${asignacion.pisoNumero}`}</Descriptions.Item>
           <Descriptions.Item label="Número de Locker">#{asignacion.lockerNumero}</Descriptions.Item>
           <Descriptions.Item label="Número de Serie">{asignacion.lockerNumeroSerie}</Descriptions.Item>
           <Descriptions.Item label="Fecha de Asignación">

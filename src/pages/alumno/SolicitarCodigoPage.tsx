@@ -87,7 +87,7 @@ const SolicitarCodigoPage = () => {
             <LockOutlined style={{ fontSize: 48, color: '#003087' }} />
             <Title level={3} style={{ margin: '12px 0 4px' }}>Código de Acceso</Title>
             <Text type="secondary">
-              Edificio {asignacion?.edificioNombre} — Piso {asignacion?.pisoNumero} —
+              Edificio {asignacion?.edificioNombre} — {asignacion?.pisoDescripcion ?? `Piso ${asignacion?.pisoNumero}`} —
               Locker #{asignacion?.lockerNumero}
             </Text>
           </div>

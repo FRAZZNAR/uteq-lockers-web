@@ -104,7 +104,10 @@ const UsuariosPage = () => {
           <Form.Item name="apellido" label="Apellido" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+          <Form.Item name="email" label="Email" rules={[
+            { required: true, type: 'email' },
+            { pattern: /^[^@]+@uteq\.edu\.mx$/i, message: 'Solo se aceptan correos @uteq.edu.mx' },
+          ]}>
             <Input />
           </Form.Item>
           <Form.Item name="matricula" label="Matrícula" rules={[{ required: true }]}>

@@ -15,9 +15,11 @@ const UsuariosPage = lazy(() => import('./pages/admin/UsuariosPage'))
 const TarjetasRfidPage = lazy(() => import('./pages/admin/TarjetasRfidPage'))
 const AccesosPage = lazy(() => import('./pages/admin/AccesosPage'))
 const ReportesPage = lazy(() => import('./pages/admin/ReportesPage'))
+const AvisosPage = lazy(() => import('./pages/admin/AvisosPage'))
 const MiLockerPage = lazy(() => import('./pages/alumno/MiLockerPage'))
 const SolicitarCodigoPage = lazy(() => import('./pages/alumno/SolicitarCodigoPage'))
 const HistorialPage = lazy(() => import('./pages/alumno/HistorialPage'))
+const AvisosAlumnoPage = lazy(() => import('./pages/alumno/AvisosAlumnoPage'))
 
 // Spinner de carga global
 const Cargando = () => (
@@ -72,6 +74,7 @@ const App = () => {
             <Route path="tarjetas" element={<TarjetasRfidPage />} />
             <Route path="accesos" element={<AccesosPage />} />
             <Route path="reportes" element={<ReportesPage />} />
+            <Route path="avisos" element={<AvisosPage />} />
           </Route>
 
           {/* Portal Alumno */}
@@ -86,6 +89,7 @@ const App = () => {
             <Route path="mi-locker" element={<MiLockerPage />} />
             <Route path="solicitar-codigo" element={<SolicitarCodigoPage />} />
             <Route path="historial" element={<HistorialPage />} />
+            <Route path="avisos" element={<AvisosAlumnoPage />} />
           </Route>
 
           {/* 404 */}
