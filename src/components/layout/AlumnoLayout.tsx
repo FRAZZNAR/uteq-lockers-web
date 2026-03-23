@@ -15,10 +15,11 @@ const menuItems = [
 ]
 
 const AlumnoLayout = () => {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(window.innerWidth <= 768)
   const navigate = useNavigate()
   const location = useLocation()
   const { usuario, logout } = useAuth()
+  const isMobile = () => window.innerWidth <= 768
 
   const handleLogout = () => {
     logout()
@@ -30,6 +31,11 @@ const AlumnoLayout = () => {
 
   return (
     <div className="al-layout">
+
+      {/* ── Mobile overlay ── */}
+      {!collapsed && isMobile() && (
+        <div className="al-overlay" onClick={() => setCollapsed(true)} />
+      )}
 
       {/* ── Sidebar ── */}
       <aside className={`al-sider ${collapsed ? 'al-sider-collapsed' : ''}`}>
@@ -53,7 +59,7 @@ const AlumnoLayout = () => {
             <button
               key={item.key}
               className={`al-nav-item ${location.pathname === item.key ? 'al-nav-active' : ''}`}
-              onClick={() => navigate(item.key)}
+              onClick={() => { navigate(item.key); if (isMobile()) setCollapsed(true) }}
               title={collapsed ? item.label : undefined}
             >
               <span className="al-nav-icon">{item.icon}</span>

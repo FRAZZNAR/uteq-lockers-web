@@ -39,14 +39,18 @@ const menuItems: MenuItem[] = [
 ]
 
 const AdminLayout = () => {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(window.innerWidth <= 768)
   const [lockersOpen, setLockersOpen] = useState(true)
   const navigate = useNavigate()
   const location = useLocation()
   const { usuario, logout } = useAuth()
+  const isMobile = () => window.innerWidth <= 768
 
   const handleNav = (key: string) => {
-    if (!key.startsWith('lockers')) navigate(key)
+    if (!key.startsWith('lockers')) {
+      navigate(key)
+      if (isMobile()) setCollapsed(true)
+    }
   }
 
   const handleLogout = () => {
@@ -75,6 +79,11 @@ const AdminLayout = () => {
 
   return (
     <div className="al-layout">
+
+      {/* ── Mobile overlay ── */}
+      {!collapsed && isMobile() && (
+        <div className="al-overlay" onClick={() => setCollapsed(true)} />
+      )}
 
       {/* ── Sidebar ── */}
       <aside className={`al-sider ${collapsed ? 'al-sider-collapsed' : ''}`}>
