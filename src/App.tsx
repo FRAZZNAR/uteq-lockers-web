@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Spin, Result, Button } from 'antd'
 import useAuthStore from './stores/authStore'
@@ -36,8 +36,7 @@ const RootRedirect = () => {
 }
 
 const App = () => {
-
-  const hasHydrated = useAuthStore((s) => s._hasHydrated)
+  const { _hasHydrated: hasHydrated, isAuthenticated, isAdmin } = useAuthStore()
 
   // Espera a que persist termine de leer el localStorage
   if (!hasHydrated) {
@@ -52,8 +51,15 @@ const App = () => {
     <BrowserRouter>
       <Suspense fallback={<Cargando />}>
         <Routes>
-          {/* Pública */}
-          <Route path="/login" element={<LoginPage />} />
+          {/* Pública — redirige si ya hay sesión activa */}
+          <Route
+            path="/login"
+            element={
+              isAuthenticated
+                ? <Navigate to={isAdmin ? '/admin/dashboard' : '/alumno/mi-locker'} replace />
+                : <LoginPage />
+            }
+          />
 
           {/* Root redirect */}
           <Route path="/" element={<RootRedirect />} />

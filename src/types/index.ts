@@ -214,3 +214,18 @@ export interface EnrolarTarjetaDto {
 export interface GenerarCodigoDto {
   asignacionId: string
 }
+
+export interface SolicitarCodigoLoginDto {
+  email: string
+  password: string
+}
+
+export interface SolicitarCodigoLoginResponseDto {
+  sesionToken: string
+  mensaje: string
+}
+
+export interface VerificarCodigoLoginDto {
+  sesionToken: string
+  codigo: string
+}

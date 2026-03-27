@@ -74,6 +74,11 @@ export default defineConfig({
               networkTimeoutSeconds: 10,
             },
           },
+          // SignalR WebSocket — nunca cachear
+          {
+            urlPattern: /\/hubs\/.*/i,
+            handler: 'NetworkOnly',
+          },
         ],
       },
       devOptions: {
@@ -87,6 +92,11 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:7120',
         changeOrigin: true,
+      },
+      '/hubs': {
+        target: 'http://localhost:7120',
+        changeOrigin: true,
+        ws: true, // WebSocket para SignalR
       },
     },
   },

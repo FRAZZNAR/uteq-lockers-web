@@ -116,7 +116,7 @@ const AlumnoLayout = () => {
 
         {/* Footer */}
         <footer className="al-footer">
-          UTEQ Lockers © 2026 — Universidad Tecnológica de Querétaro
+          UTEQ Lockers © 2026 — Universidad Tecnológica de Querétaro - Número de contacto: (442) 637-5376 - Correo: 2022371115@uteq.edu.mx
         </footer>
 
       </div>

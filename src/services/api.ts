@@ -7,10 +7,11 @@ import type {
   TarjetaRfid, EnrolarTarjetaDto,
   GenerarCodigoDto, Dispositivo,
   Aviso, CrearAvisoDto,
+  SolicitarCodigoLoginDto, SolicitarCodigoLoginResponseDto, VerificarCodigoLoginDto,
 } from '../types'
 import useAuthStore from '../stores/authStore'
 
-// ── Instancia Axios ──────────────────────────────────────────────────
+// ── Instancia Axios
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 30000,
@@ -37,10 +38,14 @@ api.interceptors.response.use(
   }
 )
 
-// ── Auth ──────────────────────────────────────────────────────────────
+// ── Auth 
 const auth = {
   login: (dto: LoginDto) =>
     api.post<ServiceResponse<{ token: string; usuario: Usuario }>>('/auth/login', dto),
+  solicitarCodigo: (dto: SolicitarCodigoLoginDto) =>
+    api.post<ServiceResponse<SolicitarCodigoLoginResponseDto>>('/auth/solicitar-codigo', dto),
+  verificarCodigo: (dto: VerificarCodigoLoginDto) =>
+    api.post<ServiceResponse<{ token: string; usuario: Usuario }>>('/auth/verificar-codigo', dto),
 }
 
 // ── Usuarios ──────────────────────────────────────────────────────────

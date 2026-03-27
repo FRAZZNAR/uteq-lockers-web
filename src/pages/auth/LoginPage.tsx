@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import {
@@ -7,28 +7,39 @@ import {
   EyeOutlined,
   EyeInvisibleOutlined,
   ArrowRightOutlined,
+  SafetyCertificateOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import useAuth from "../../hooks/useAuth";
-import type { LoginDto } from "../../types";
-import "./LoginPage.css";
+import api from "../../services/api";
 import useAuthStore from "../../stores/authStore";
+import "./LoginPage.css";
+
+type Paso = "credenciales" | "codigo";
 
 const LoginPage = () => {
+  const [paso, setPaso] = useState<Paso>("credenciales");
   const [cargando, setCargando] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
-  const [form, setForm] = useState<LoginDto>({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [sesionToken, setSesionToken] = useState("");
+  const [codigo, setCodigo] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const codigoRef = useRef<HTMLInputElement>(null);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  // Paso 1: solicitar código 2FA
+  const onSubmitCredenciales = async (e: React.FormEvent) => {
     e.preventDefault();
     setCargando(true);
     try {
-      await login(form);
-      // Lee del store, no del localStorage
-      const { usuario } = useAuthStore.getState();
-      if (usuario?.rol === "Admin") navigate("/admin/dashboard");
-      else navigate("/alumno/mi-locker");
+      const res = await api.auth.solicitarCodigo({ email, password });
+      if (!res.data.success || !res.data.data) throw new Error("Error al solicitar código");
+      setSesionToken(res.data.data.sesionToken);
+      setPaso("codigo");
+      message.success("Código enviado a tu correo institucional");
+      setTimeout(() => codigoRef.current?.focus(), 100);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { errors?: string[] } } })?.response?.data
@@ -37,6 +48,45 @@ const LoginPage = () => {
     } finally {
       setCargando(false);
     }
+  };
+
+  // Paso 2: verificar código 2FA
+  const onSubmitCodigo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (codigo.length !== 6) {
+      message.warning("Ingresa el código de 6 dígitos");
+      return;
+    }
+    setCargando(true);
+    try {
+      const res = await api.auth.verificarCodigo({ sesionToken, codigo });
+      const { token, usuario } = res.data.data!;
+      // Guardar en store y sessionStorage
+      useAuthStore.setState({
+        token,
+        usuario,
+        isAuthenticated: true,
+        isAdmin: usuario.rol === "Admin",
+        isAlumno: usuario.rol === "Alumno",
+      });
+      // Guardar ID en sessionStorage explícitamente
+      sessionStorage.setItem("userId", usuario.id);
+      if (usuario.rol === "Admin") navigate("/admin/dashboard");
+      else navigate("/alumno/mi-locker");
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { errors?: string[] } } })?.response?.data
+          ?.errors?.[0] ?? "Código incorrecto o expirado";
+      message.error(msg);
+      setCodigo("");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const handleCodigoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setCodigo(val);
   };
 
   return (
@@ -79,74 +129,132 @@ const LoginPage = () => {
       {/* Panel derecho */}
       <div className="lp-right">
         <div className="lp-form-wrapper">
-          <div className="lp-form-header">
-            <p className="lp-welcome">Bienvenido de vuelta</p>
-            <h2 className="lp-form-title">Inicia sesión</h2>
-          </div>
 
-          <form onSubmit={onSubmit} autoComplete="off">
-            <div className="lp-field">
-              <label htmlFor="email">Correo</label>
-              <div className="lp-input-row">
-                <span className="lp-input-icon">
-                  <MailOutlined />
-                </span>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="usuario@uteq.edu.mx"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
-                  className="lp-input-with-icon"
-                />
+          {/* PASO 1: Credenciales */}
+          {paso === "credenciales" && (
+            <>
+              <div className="lp-form-header">
+                <p className="lp-welcome">Bienvenido de vuelta</p>
+                <h2 className="lp-form-title">Inicia sesión</h2>
               </div>
-            </div>
 
-            <div className="lp-field">
-              <label htmlFor="password">Contraseña</label>
-              <div className="lp-input-row">
-                <span className="lp-input-icon">
-                  <LockOutlined />
-                </span>
-                <input
-                  id="password"
-                  type={showPwd ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  required
-                  className="lp-input-with-icon"
-                />
-                <button
-                  type="button"
-                  className="lp-eye"
-                  onClick={() => setShowPwd((v) => !v)}
-                >
-                  {showPwd ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              <form onSubmit={onSubmitCredenciales} autoComplete="off">
+                <div className="lp-field">
+                  <label htmlFor="email">Correo</label>
+                  <div className="lp-input-row">
+                    <span className="lp-input-icon">
+                      <MailOutlined />
+                    </span>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="usuario@uteq.edu.mx"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="lp-input-with-icon"
+                    />
+                  </div>
+                </div>
+
+                <div className="lp-field">
+                  <label htmlFor="password">Contraseña</label>
+                  <div className="lp-input-row">
+                    <span className="lp-input-icon">
+                      <LockOutlined />
+                    </span>
+                    <input
+                      id="password"
+                      type={showPwd ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="lp-input-with-icon"
+                    />
+                    <button
+                      type="button"
+                      className="lp-eye"
+                      onClick={() => setShowPwd((v) => !v)}
+                    >
+                      {showPwd ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" className="lp-btn" disabled={cargando}>
+                  {cargando ? "Verificando..." : "Continuar"}
+                  <span className="lp-btn-arrow">
+                    <ArrowRightOutlined />
+                  </span>
                 </button>
+              </form>
+
+              <p className="lp-footer" style={{ marginTop: 16 }}>
+                <SafetyCertificateOutlined style={{ marginRight: 6 }} />
+                Autenticación en dos pasos habilitada
+              </p>
+            </>
+          )}
+
+          {/* PASO 2: Código de verificación */}
+          {paso === "codigo" && (
+            <>
+              <div className="lp-form-header">
+                <p className="lp-welcome">Verificación en dos pasos</p>
+                <h2 className="lp-form-title">Ingresa el código</h2>
+                <p style={{ color: "#888", fontSize: 14, marginTop: 8 }}>
+                  Enviamos un código de 6 dígitos a{" "}
+                  <strong>{email}</strong>. Revisa tu bandeja de entrada.
+                </p>
               </div>
-            </div>
 
-            <div className="lp-row-between">
-              <a href="#" className="lp-link">
-                ¿Olvidaste tu contraseña?
-              </a>
-            </div>
+              <form onSubmit={onSubmitCodigo} autoComplete="off">
+                <div className="lp-field">
+                  <label htmlFor="codigo">Código de verificación</label>
+                  <div className="lp-input-row">
+                    <span className="lp-input-icon">
+                      <SafetyCertificateOutlined />
+                    </span>
+                    <input
+                      id="codigo"
+                      ref={codigoRef}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="000000"
+                      value={codigo}
+                      onChange={handleCodigoChange}
+                      required
+                      maxLength={6}
+                      className="lp-input-with-icon"
+                      style={{ letterSpacing: "0.4em", fontWeight: "bold", fontSize: 22 }}
+                    />
+                  </div>
+                </div>
 
-            <button type="submit" className="lp-btn" disabled={cargando}>
-              {cargando ? "Entrando..." : "Entrar al sistema"}
-              <span className="lp-btn-arrow">
-                <ArrowRightOutlined />
-              </span>
-            </button>
-          </form>
+                <button type="submit" className="lp-btn" disabled={cargando || codigo.length !== 6}>
+                  {cargando ? "Verificando..." : "Entrar al sistema"}
+                  <span className="lp-btn-arrow">
+                    <ArrowRightOutlined />
+                  </span>
+                </button>
+              </form>
 
-          <p className="lp-footer">
-            ¿Problemas? Contacta a soporte técnico UTEQ
-          </p>
+              <button
+                className="lp-link"
+                style={{ background: "none", border: "none", cursor: "pointer", marginTop: 16, display: "flex", alignItems: "center", gap: 6 }}
+                onClick={() => { setPaso("credenciales"); setCodigo(""); setSesionToken(""); }}
+              >
+                <ArrowLeftOutlined />
+                Volver e ingresar credenciales nuevamente
+              </button>
+
+              <p className="lp-footer">
+                ¿Problemas? Contacta a soporte técnico UTEQ
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

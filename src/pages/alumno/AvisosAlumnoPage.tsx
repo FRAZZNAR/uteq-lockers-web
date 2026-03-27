@@ -1,25 +1,44 @@
-import { useEffect, useState } from 'react'
-import { Card, Tag, Empty, Spin, Alert } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Card, Tag, Empty, Spin, Alert, notification } from 'antd'
 import { BellOutlined, WarningOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../../services/api'
+import useSignalR from '../../hooks/useSignalR'
 import type { Aviso } from '../../types'
 
 const AvisosAlumnoPage = () => {
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [cargando, setCargando] = useState(true)
 
-  useEffect(() => {
-    const cargar = async () => {
-      try {
-        const res = await api.avisos.misAvisos()
-        setAvisos(res.data.data ?? [])
-      } finally {
-        setCargando(false)
-      }
+  const cargar = useCallback(async () => {
+    try {
+      const res = await api.avisos.misAvisos()
+      setAvisos(res.data.data ?? [])
+    } finally {
+      setCargando(false)
     }
-    cargar()
   }, [])
+
+  useEffect(() => {
+    cargar()
+  }, [cargar])
+
+  // Tiempo real: cuando admin crea un nuevo aviso
+  useSignalR({
+    onNuevoAviso: (nuevoAviso) => {
+      setAvisos((prev) => {
+        // Evitar duplicados
+        if (prev.some((a) => a.id === nuevoAviso.id)) return prev
+        return [nuevoAviso, ...prev]
+      })
+      notification.warning({
+        message: 'Nuevo aviso recibido',
+        description: `Debes desocupar tu locker antes del ${dayjs(nuevoAviso.fechaLimite).format('DD/MM/YYYY')}`,
+        icon: <WarningOutlined style={{ color: '#e67e22' }} />,
+        duration: 8,
+      })
+    },
+  })
 
   if (cargando) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
 

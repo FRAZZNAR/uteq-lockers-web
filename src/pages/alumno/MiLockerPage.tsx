@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Result, Button, Descriptions, Tag, Space, Modal, Input, message } from 'antd'
+import { Card, Result, Button, Descriptions, Tag, Space, Modal, Input, message, notification } from 'antd'
 import { LockOutlined, MailOutlined, WifiOutlined, ToolOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../../services/api'
 import useAuth from '../../hooks/useAuth'
+import useSignalR from '../../hooks/useSignalR'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
 import type { Asignacion, TarjetaRfid } from '../../types'
 
@@ -32,6 +33,24 @@ const MiLockerPage = () => {
     }
     cargar()
   }, [usuario])
+
+  // Tiempo real: cuando admin asigna un locker a este alumno
+  useSignalR({
+    onNuevaAsignacion: (nuevaAsignacion) => {
+      setAsignacion(nuevaAsignacion)
+      notification.success({
+        message: '¡Se te asignó un locker!',
+        description: `Edificio ${nuevaAsignacion.edificioNombre} — Locker #${nuevaAsignacion.lockerNumero}`,
+        duration: 10,
+      })
+      // Recargar tarjetas
+      if (usuario) {
+        api.tarjetas.listarPorAlumno(usuario.id).then((tRes) => {
+          setTarjetas((tRes.data.data ?? []).filter((t: TarjetaRfid) => t.activa))
+        })
+      }
+    },
+  })
 
   if (cargando) return null
 
