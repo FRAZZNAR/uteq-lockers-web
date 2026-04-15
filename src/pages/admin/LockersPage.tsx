@@ -18,6 +18,7 @@ const LockersPage = () => {
   const [mapaH, setMapaH] = useState<{ pisoNumero: number; lockers: LockerMapaItem[] }[]>([])
   const [mapaK, setMapaK] = useState<{ pisoNumero: number; lockers: LockerMapaItem[] }[]>([])
   const [cargando, setCargando] = useState(true)
+  const [tabActiva, setTabActiva] = useState('H')
   const [modalNuevo, setModalNuevo] = useState(false)
   const [modalDispositivo, setModalDispositivo] = useState(false)
   const [deviceKey, setDeviceKey] = useState('')
@@ -137,7 +138,7 @@ const LockersPage = () => {
         </Button>
       </Space>
 
-      <Tabs>
+      <Tabs activeKey={tabActiva} onChange={setTabActiva}>
         <TabPane tab="Edificio H" key="H">
           <Card title="Mapa visual" style={{ marginBottom: 16 }}>
             <LockerGrid pisos={mapaH} />
