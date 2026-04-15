@@ -69,7 +69,6 @@ const LoginPage = () => {
     try {
       const res = await api.auth.verificarCodigo({ sesionToken, codigo });
       const { token, usuario } = res.data.data!;
-      // Guardar en store y sessionStorage
       useAuthStore.setState({
         token,
         usuario,
@@ -77,7 +76,6 @@ const LoginPage = () => {
         isAdmin: usuario.rol === "Admin",
         isAlumno: usuario.rol === "Alumno",
       });
-      // Guardar ID en sessionStorage explícitamente
       sessionStorage.setItem("userId", usuario.id);
       if (usuario.rol === "Admin") navigate("/admin/dashboard");
       else navigate("/alumno/mi-locker");
