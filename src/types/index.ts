@@ -5,6 +5,8 @@ export type EstadoLocker = 'Disponible' | 'Asignado' | 'Mantenimiento'
 export type MetodoAcceso = 'RFID' | 'OTP' | 'Admin'
 export type ResultadoAcceso = 'Exitoso' | 'Fallido'
 export type EstadoDispositivo = 'Online' | 'Offline'
+export type TipoTicket = 'Alta' | 'Baja' | 'Cambio'
+export type EstadoTicket = 'Abierto' | 'EnProceso' | 'Cerrado'
 
 export interface Usuario {
   id: string
@@ -13,6 +15,8 @@ export interface Usuario {
   nombre: string
   apellido: string
   rol: Rol
+  carrera?: string
+  tutor?: string
   creadoEn: string
 }
 
@@ -52,6 +56,7 @@ export interface Asignacion {
   lockerNumero: number
   edificioNombre: string
   pisoNumero: number
+  pisoDescripcion?: string
   estudianteId: string
   estudianteNombre: string
   estudianteMatricula: string
@@ -65,6 +70,7 @@ export interface Locker {
   id: string
   pisoId: string
   pisoNumero: number
+  pisoDescripcion?: string
   edificioId: string
   edificioNombre: string
   numero: number
@@ -138,6 +144,30 @@ export interface Dispositivo {
   estado: EstadoDispositivo
 }
 
+export interface Aviso {
+  id: string
+  asignacionId: string
+  lockerNumeroSerie: string
+  lockerNumero: number
+  edificioNombre: string
+  pisoDescripcion?: string
+  estudianteNombre: string
+  estudianteMatricula: string
+  estudianteEmail: string
+  estudianteCarrera?: string
+  tutorEmail?: string
+  mensaje: string
+  fechaLimite: string
+  estado: 'Pendiente' | 'Cumplido'
+  creadoEn: string
+}
+
+export interface CrearAvisoDto {
+  asignacionId: string
+  mensaje?: string
+  diasLimite: number
+}
+
 export interface PaginatedResponse<T> {
   items: T[]
   total: number
@@ -165,6 +195,8 @@ export interface CrearUsuarioDto {
   apellido: string
   password: string
   rol: Rol
+  carrera?: string
+  tutor?: string
 }
 
 export interface ActualizarUsuarioDto {
@@ -173,6 +205,37 @@ export interface ActualizarUsuarioDto {
   email?: string
   matricula?: string
   password?: string
+  carrera?: string
+  tutor?: string
+}
+
+export interface TicketMantenimiento {
+  id: string
+  lockerId: string
+  lockerNumero: number
+  lockerNumeroSerie: string
+  edificioNombre: string
+  pisoNumero: number
+  pisoDescripcion?: string
+  tipo: TipoTicket
+  descripcion: string
+  personalAsignado?: string
+  estado: EstadoTicket
+  creadoEn: string
+  cerradoEn?: string
+}
+
+export interface CrearTicketMantenimientoDto {
+  lockerId: string
+  tipo: TipoTicket
+  descripcion: string
+  personalAsignado?: string
+}
+
+export interface ActualizarTicketMantenimientoDto {
+  estado?: EstadoTicket
+  personalAsignado?: string
+  descripcion?: string
 }
 
 export interface CrearAsignacionDto {
@@ -189,4 +252,19 @@ export interface EnrolarTarjetaDto {
 
 export interface GenerarCodigoDto {
   asignacionId: string
+}
+
+export interface SolicitarCodigoLoginDto {
+  email: string
+  password: string
+}
+
+export interface SolicitarCodigoLoginResponseDto {
+  sesionToken: string
+  mensaje: string
+}
+
+export interface VerificarCodigoLoginDto {
+  sesionToken: string
+  codigo: string
 }

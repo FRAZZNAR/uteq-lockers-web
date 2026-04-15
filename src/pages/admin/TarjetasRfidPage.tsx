@@ -110,8 +110,21 @@ const TarjetasRfidPage = () => {
             </Select>
           </Form.Item>
           <Form.Item name="uid" label="UID de la Tarjeta (hex)"
-            rules={[{ required: true, message: 'Ingresa el UID' }]}>
-            <Input placeholder="AA:BB:CC:DD" style={{ fontFamily: 'monospace' }} />
+            rules={[
+              { required: true, message: 'Ingresa el UID de la tarjeta' },
+              {
+                pattern: /^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){1,6}$|^[0-9A-Fa-f]{4,14}$/,
+                message: 'Formato inválido. Usa AA:BB:CC:DD o AABBCCDD (solo caracteres hexadecimales)',
+              },
+            ]}>
+            <Input
+              placeholder="AA:BB:CC:DD"
+              style={{ fontFamily: 'monospace', textTransform: 'uppercase' }}
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^0-9A-Fa-f:]/g, '').toUpperCase()
+                e.target.value = v
+              }}
+            />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>Enrolar</Button>
         </Form>
