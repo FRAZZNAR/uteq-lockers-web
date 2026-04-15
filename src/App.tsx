@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Spin, Result, Button } from 'antd'
 import useAuthStore from './stores/authStore'
@@ -15,9 +15,12 @@ const UsuariosPage = lazy(() => import('./pages/admin/UsuariosPage'))
 const TarjetasRfidPage = lazy(() => import('./pages/admin/TarjetasRfidPage'))
 const AccesosPage = lazy(() => import('./pages/admin/AccesosPage'))
 const ReportesPage = lazy(() => import('./pages/admin/ReportesPage'))
+const AvisosPage = lazy(() => import('./pages/admin/AvisosPage'))
+const TicketsMantenimientoPage = lazy(() => import('./pages/admin/TicketsMantenimientoPage'))
 const MiLockerPage = lazy(() => import('./pages/alumno/MiLockerPage'))
 const SolicitarCodigoPage = lazy(() => import('./pages/alumno/SolicitarCodigoPage'))
 const HistorialPage = lazy(() => import('./pages/alumno/HistorialPage'))
+const AvisosAlumnoPage = lazy(() => import('./pages/alumno/AvisosAlumnoPage'))
 
 // Spinner de carga global
 const Cargando = () => (
@@ -34,17 +37,30 @@ const RootRedirect = () => {
 }
 
 const App = () => {
-  const init = useAuthStore((s) => s.init)
+  const { _hasHydrated: hasHydrated, isAuthenticated, isAdmin } = useAuthStore()
 
-  // Recuperar sesión guardada al montar la app
-  useEffect(() => { init() }, [init])
-
+  // Espera a que persist termine de leer el localStorage
+  if (!hasHydrated) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+  
   return (
     <BrowserRouter>
       <Suspense fallback={<Cargando />}>
         <Routes>
-          {/* Pública */}
-          <Route path="/login" element={<LoginPage />} />
+          {/* Pública — redirige si ya hay sesión activa */}
+          <Route
+            path="/login"
+            element={
+              isAuthenticated
+                ? <Navigate to={isAdmin ? '/admin/dashboard' : '/alumno/mi-locker'} replace />
+                : <LoginPage />
+            }
+          />
 
           {/* Root redirect */}
           <Route path="/" element={<RootRedirect />} />
@@ -65,6 +81,8 @@ const App = () => {
             <Route path="tarjetas" element={<TarjetasRfidPage />} />
             <Route path="accesos" element={<AccesosPage />} />
             <Route path="reportes" element={<ReportesPage />} />
+            <Route path="avisos" element={<AvisosPage />} />
+            <Route path="tickets" element={<TicketsMantenimientoPage />} />
           </Route>
 
           {/* Portal Alumno */}
@@ -79,6 +97,7 @@ const App = () => {
             <Route path="mi-locker" element={<MiLockerPage />} />
             <Route path="solicitar-codigo" element={<SolicitarCodigoPage />} />
             <Route path="historial" element={<HistorialPage />} />
+            <Route path="avisos" element={<AvisosAlumnoPage />} />
           </Route>
 
           {/* 404 */}

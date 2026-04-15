@@ -1,14 +1,18 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Row, Col, Card, Statistic, Tabs, List, Tag, Spin, Alert, Modal,
-  Select, Popconfirm, message } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons'
+import { Row, Col, List, Tag, Spin, Modal, Select, Popconfirm, message, Tabs } from 'antd'
+import {
+  CheckCircleOutlined, CloseCircleOutlined,
+  LockOutlined, UnlockOutlined, ToolOutlined, DashboardOutlined,
+  WarningOutlined,
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../../services/api'
 import LockerGrid from '../../components/LockerGrid/LockerGrid'
 import type { DashboardStats, AccesoLog, Edificio, LockerMapaItem, Locker } from '../../types'
+import './DashboardPage.css'
 
-const { TabPane } = Tabs
 const { Option } = Select
+const { TabPane } = Tabs
 
 const DashboardPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null)
@@ -37,7 +41,6 @@ const DashboardPage = () => {
       const edifs = edificiosRes.data.data ?? []
       setEdificios(edifs)
 
-      // Cargar mapas de cada edificio
       const edificioH = edifs.find((e: Edificio) => e.nombre === 'H')
       const edificioK = edifs.find((e: Edificio) => e.nombre === 'K')
       if (edificioH) {
@@ -57,7 +60,6 @@ const DashboardPage = () => {
 
   useEffect(() => {
     cargarDatos()
-    // Polling cada 15 segundos
     const interval = setInterval(cargarDatos, 15000)
     return () => clearInterval(interval)
   }, [cargarDatos])
@@ -88,7 +90,7 @@ const DashboardPage = () => {
     try {
       const asigRes = await api.asignaciones.listar()
       const asig = (asigRes.data.data ?? []).find(
-        (a) => a.lockerId === detalleLocker.id && a.activa
+        (a: any) => a.lockerId === detalleLocker.id && a.activa
       )
       if (asig) {
         await api.asignaciones.liberar(asig.id)
@@ -101,137 +103,230 @@ const DashboardPage = () => {
     }
   }
 
-  if (cargando && !stats) return <Spin size="large" style={{ display: 'block', margin: '80px auto' }} />
+  if (cargando && !stats) {
+    return (
+      <div className="dash-loading">
+        <Spin size="large" />
+      </div>
+    )
+  }
+
+  const ocupacion = stats?.porcentajeOcupacion ?? 0
 
   return (
-    <div>
-      <h2 style={{ color: '#003087', marginTop: 0 }}>Dashboard</h2>
+    <div className="dash-wrapper">
 
-      {/* Stats */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col xs={12} sm={6}>
-          <Card><Statistic title="Total Lockers" value={stats?.totalLockers ?? 0} /></Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Disponibles" value={stats?.disponibles ?? 0}
-              suffix={`/ ${stats?.totalLockers ?? 0}`}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Asignados" value={stats?.asignados ?? 0}
-              suffix={`(${stats?.porcentajeOcupacion ?? 0}%)`}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
-            <Statistic
-              title="Mantenimiento" value={stats?.mantenimiento ?? 0}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* ── Page header ── */}
+      <div className="dash-page-header">
+        <div className="dash-page-header-left">
+          <DashboardOutlined className="dash-page-icon" />
+          <div>
+            <h1 className="dash-page-title">Dashboard</h1>
+            <p className="dash-page-subtitle">Resumen general del sistema de lockers UTEQ</p>
+          </div>
+        </div>
+        <div className="dash-last-update">
+          Actualización automática cada 15 s
+        </div>
+      </div>
 
-      <Row gutter={16}>
-        {/* Mapas */}
-        <Col xs={24} lg={14}>
-          <Card title="Mapa de Lockers">
-            <Tabs>
-              <TabPane tab="Edificio H" key="H">
-                <LockerGrid pisos={mapaH} onLockerClick={abrirModalLocker} />
-              </TabPane>
-              <TabPane tab="Edificio K" key="K">
-                <LockerGrid pisos={mapaK} onLockerClick={abrirModalLocker} />
-              </TabPane>
-            </Tabs>
-          </Card>
-        </Col>
+      {/* ── Stat cards ── */}
+      <div className="dash-stats-grid">
 
-        {/* Accesos recientes */}
-        <Col xs={24} lg={10}>
-          <Card title="Accesos Recientes" style={{ marginBottom: 16 }}>
-            <List
-              size="small"
-              dataSource={recientes.slice(0, 10)}
-              renderItem={(a) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      a.resultado === 'Exitoso'
-                        ? <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 18 }} />
-                        : <CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: 18 }} />
-                    }
-                    title={`Edificio ${a.edificioNombre} — Locker #${a.lockerNumero}`}
-                    description={`${a.estudianteNombre ?? '—'} · ${dayjs(a.timestamp).format('HH:mm')}`}
-                  />
-                  <Tag color={a.metodo === 'RFID' ? 'blue' : 'purple'}>{a.metodo}</Tag>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
+        <div className="dash-stat-card dash-stat-dark">
+          <div className="dash-stat-icon-wrap"><LockOutlined /></div>
+          <div className="dash-stat-body">
+            <span className="dash-stat-label">Total Lockers</span>
+            <span className="dash-stat-value">{stats?.totalLockers ?? 0}</span>
+          </div>
+          <div className="dash-stat-badge">UTEQ</div>
+        </div>
 
-      {/* Alertas */}
+        <div className="dash-stat-card dash-stat-available">
+          <div className="dash-stat-icon-wrap"><UnlockOutlined /></div>
+          <div className="dash-stat-body">
+            <span className="dash-stat-label">Disponibles</span>
+            <span className="dash-stat-value">{stats?.disponibles ?? 0}</span>
+            <span className="dash-stat-sub">de {stats?.totalLockers ?? 0} lockers</span>
+          </div>
+          <div className="dash-stat-ring">
+            <svg viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(122,174,224,0.2)" strokeWidth="3"/>
+              <circle
+                cx="18" cy="18" r="15" fill="none"
+                stroke="#7aaee0" strokeWidth="3"
+                strokeDasharray={`${Math.round((1 - ocupacion / 100) * 94)} 94`}
+                strokeLinecap="round"
+                transform="rotate(-90 18 18)"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div className="dash-stat-card dash-stat-assigned">
+          <div className="dash-stat-icon-wrap"><LockOutlined /></div>
+          <div className="dash-stat-body">
+            <span className="dash-stat-label">Asignados</span>
+            <span className="dash-stat-value">{stats?.asignados ?? 0}</span>
+            <span className="dash-stat-sub">{ocupacion}% ocupación</span>
+          </div>
+          <div className="dash-stat-bar-wrap">
+            <div className="dash-stat-bar" style={{ width: `${ocupacion}%` }} />
+          </div>
+        </div>
+
+        <div className="dash-stat-card dash-stat-maintenance">
+          <div className="dash-stat-icon-wrap"><ToolOutlined /></div>
+          <div className="dash-stat-body">
+            <span className="dash-stat-label">Mantenimiento</span>
+            <span className="dash-stat-value">{stats?.mantenimiento ?? 0}</span>
+            <span className="dash-stat-sub">fuera de servicio</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Alerta de fallidos ── */}
       {fallidos.length > 0 && (
-        <Card title={`⚠️ Accesos Fallidos (últimas 24h): ${fallidos.length}`} style={{ marginTop: 16 }}>
-          <Alert
-            type="warning"
-            message={`${fallidos.length} accesos fallidos detectados en las últimas 24 horas.`}
-            showIcon
-          />
-        </Card>
+        <div className="dash-alert">
+          <WarningOutlined className="dash-alert-icon" />
+          <span>
+            <strong>{fallidos.length}</strong> accesos fallidos detectados en las últimas 24 horas
+          </span>
+        </div>
       )}
 
-      {/* Modal detalle locker */}
+      {/* ── Main content: usa flex en lugar de Row/Col de Ant ── */}
+      <div className="dash-main-row">
+
+        {/* Mapa de lockers — crece para llenar espacio */}
+        <div className="dash-col-mapa">
+          <div className="dash-card dash-card-full">
+            <div className="dash-card-header">
+              <span className="dash-card-title">Mapa de Lockers</span>
+              <span className="dash-card-live">
+                <span className="dash-live-dot" />
+                En vivo
+              </span>
+            </div>
+            <div className="dash-card-body">
+              <Tabs className="dash-tabs">
+                <TabPane tab="Edificio H" key="H">
+                  <LockerGrid pisos={mapaH} onLockerClick={abrirModalLocker} />
+                </TabPane>
+                <TabPane tab="Edificio K" key="K">
+                  <LockerGrid pisos={mapaK} onLockerClick={abrirModalLocker} />
+                </TabPane>
+              </Tabs>
+            </div>
+          </div>
+        </div>
+
+        {/* Accesos recientes — ancho fijo */}
+        <div className="dash-col-accesos">
+          <div className="dash-card dash-card-full">
+            <div className="dash-card-header">
+              <span className="dash-card-title">Accesos Recientes</span>
+              <Tag className="dash-recent-count">{recientes.length}</Tag>
+            </div>
+            <div className="dash-card-body dash-card-scroll">
+              {recientes.length === 0 ? (
+                <div className="dash-empty">
+                  <LockOutlined className="dash-empty-icon" />
+                  <span>Sin accesos recientes</span>
+                </div>
+              ) : (
+                <List
+                  size="small"
+                  dataSource={recientes.slice(0, 12)}
+                  renderItem={(a) => (
+                    <List.Item className="dash-acceso-item">
+                      <div className="dash-acceso-icon-col">
+                        {a.resultado === 'Exitoso'
+                          ? <CheckCircleOutlined className="dash-acceso-ok" />
+                          : <CloseCircleOutlined className="dash-acceso-fail" />
+                        }
+                      </div>
+                      <div className="dash-acceso-info">
+                        <span className="dash-acceso-loc">
+                          Edificio {a.edificioNombre} · #{a.lockerNumero}
+                        </span>
+                        <span className="dash-acceso-name">
+                          {a.estudianteNombre ?? '—'}
+                        </span>
+                      </div>
+                      <div className="dash-acceso-right">
+                        <span className="dash-acceso-time">
+                          {dayjs(a.timestamp).format('HH:mm')}
+                        </span>
+                        <Tag
+                          className="dash-acceso-method"
+                          color={a.metodo === 'RFID' ? 'blue' : 'purple'}
+                        >
+                          {a.metodo}
+                        </Tag>
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Modal detalle locker ── */}
       <Modal
-        title={`Locker #${lockerSeleccionado?.numero} — ${lockerSeleccionado?.numeroSerie}`}
+        title={null}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
+        className="dash-locker-modal"
+        width={400}
       >
-        {detalleLocker && (
-          <div>
-            <p><strong>Estado:</strong> {detalleLocker.estado}</p>
-            <p><strong>Asignado a:</strong> {detalleLocker.asignadoA ?? 'Nadie'}</p>
-            <p><strong>Dispositivo:</strong> {detalleLocker.dispositivoEstado ?? 'Sin dispositivo'}</p>
-            <Row gutter={8} style={{ marginTop: 16 }}>
-              <Col>
-                <Select
-                  placeholder="Cambiar estado"
-                  style={{ width: 160 }}
-                  onChange={cambiarEstado}
-                >
-                  <Option value="Disponible">Disponible</Option>
-                  <Option value="Mantenimiento">Mantenimiento</Option>
-                </Select>
-              </Col>
+        {detalleLocker ? (
+          <div className="dash-modal-body">
+            <div className="dash-modal-header">
+              <div className="dash-modal-locker-icon"><LockOutlined /></div>
+              <div>
+                <h3 className="dash-modal-title">Locker #{lockerSeleccionado?.numero}</h3>
+                <span className="dash-modal-serie">{lockerSeleccionado?.numeroSerie}</span>
+              </div>
+            </div>
+            <div className="dash-modal-fields">
+              <div className="dash-modal-field">
+                <span className="dash-modal-field-label">Estado</span>
+                <span className={`dash-modal-estado dash-estado-${detalleLocker.estado?.toLowerCase()}`}>
+                  {detalleLocker.estado}
+                </span>
+              </div>
+              <div className="dash-modal-field">
+                <span className="dash-modal-field-label">Asignado a</span>
+                <span className="dash-modal-field-value">{detalleLocker.asignadoA ?? 'Sin asignar'}</span>
+              </div>
+              <div className="dash-modal-field">
+                <span className="dash-modal-field-label">Dispositivo</span>
+                <span className="dash-modal-field-value">{detalleLocker.dispositivoEstado ?? 'Sin dispositivo'}</span>
+              </div>
+            </div>
+            <div className="dash-modal-actions">
+              <Select placeholder="Cambiar estado" style={{ flex: 1 }} onChange={cambiarEstado}>
+                <Option value="Disponible">Disponible</Option>
+                <Option value="Mantenimiento">Mantenimiento</Option>
+              </Select>
               {detalleLocker.asignadoA && (
-                <Col>
-                  <Popconfirm
-                    title="¿Liberar este locker?"
-                    onConfirm={liberarLocker}
-                    okText="Sí" cancelText="No"
-                  >
-                    <button style={{
-                      background: '#ff4d4f', color: 'white', border: 'none',
-                      borderRadius: 6, padding: '5px 16px', cursor: 'pointer'
-                    }}>Liberar</button>
-                  </Popconfirm>
-                </Col>
+                <Popconfirm title="¿Liberar este locker?" onConfirm={liberarLocker} okText="Sí" cancelText="No">
+                  <button className="dash-modal-liberar">Liberar</button>
+                </Popconfirm>
               )}
-            </Row>
+            </div>
           </div>
+        ) : (
+          <div className="dash-loading"><Spin /></div>
         )}
       </Modal>
+
     </div>
   )
 }

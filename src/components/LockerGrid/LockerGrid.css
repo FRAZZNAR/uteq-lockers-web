@@ -1,25 +1,152 @@
-.locker-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
-  padding: 8px 0;
+/* ── UTEQ Locker Grid ───────────────────────────────────────────────────── */
+
+/* ── Header global (leyenda + chips) ── */
+.lkg-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
-.locker-card {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
+.lkg-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.lkg-legend-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: white;
-  cursor: default;
-  transition: transform 0.15s, box-shadow 0.15s;
+  gap: 5px;
+  font-size: 12px;
+  color: #888888;
   user-select: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.lkg-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.lkg-dot-disponible    { background: rgba(122,174,224,0.45); border: 1.5px solid #7aaee0; }
+.lkg-dot-asignado      { background: rgba(0,59,113,0.18);    border: 1.5px solid #003B71; }
+.lkg-dot-mantenimiento { background: rgba(250,173,20,0.2);   border: 1.5px solid #faad14; }
+
+.lkg-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lkg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #555;
+}
+.lkg-chip strong         { font-weight: 700; }
+.lkg-chip-total strong   { color: #242B57; }
+.lkg-chip-disp  strong   { color: #1a7abf; }
+.lkg-chip-asig  strong   { color: #003B71; }
+.lkg-chip-mant  strong   { color: #d48806; }
+
+/* ── Sección de piso ── */
+.lkg-floor {
+  margin-bottom: 24px;
+}
+
+.lkg-floor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lkg-floor-count {
+  font-size: 11px;
+  color: #aaaaaa;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lkg-floor-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #e5e7eb 60%, transparent);
+  min-width: 12px;
+}
+
+.lkg-floor-mini {
+  font-size: 11px;
+  white-space: nowrap;
+  color: #aaaaaa;
+  flex-shrink: 0;
+}
+
+/* ── Título de piso (badge) ── */
+.piso-titulo {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #003B71;
+  background: rgba(0, 59, 113, 0.07);
+  padding: 3px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Grid de lockers ── */
+.locker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  /* Fondo de "pared" detrás de los lockers */
+  background: #e8ecf0;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* ══════════════════════════════════════════════
+   LOCKER 3D
+   ══════════════════════════════════════════════ */
+.locker-card {
+  position: relative;
+  width: 38px;
+  height: 52px;
+  border-radius: 4px 4px 3px 3px;
+  cursor: default;
+  user-select: none;
+  transition: transform 0.12s ease;
+
+  /* Face delantera — se sobreescribe por estado */
+  background: #c8d6e5;
+
+  /* Efecto puerta metálica: borde superior claro, inferior oscuro, lados degradados */
+  box-shadow:
+    /* Borde superior (luz) */
+    inset 0 2px 0 rgba(255,255,255,0.55),
+    /* Borde inferior (sombra) */
+    inset 0 -2px 0 rgba(0,0,0,0.18),
+    /* Borde izquierdo (luz lateral) */
+    inset 2px 0 0 rgba(255,255,255,0.3),
+    /* Borde derecho (sombra lateral) */
+    inset -2px 0 0 rgba(0,0,0,0.12),
+    /* Sombra exterior para profundidad */
+    2px 3px 6px rgba(0,0,0,0.22),
+    1px 1px 0 rgba(0,0,0,0.1);
 }
 
 .locker-card.clickable {
@@ -27,23 +154,110 @@
 }
 
 .locker-card.clickable:hover {
-  transform: scale(1.06);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transform: translateY(-3px) scale(1.06);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.65),
+    inset 0 -2px 0 rgba(0,0,0,0.2),
+    inset 2px 0 0 rgba(255,255,255,0.35),
+    inset -2px 0 0 rgba(0,0,0,0.14),
+    3px 8px 14px rgba(0,0,0,0.28),
+    1px 1px 0 rgba(0,0,0,0.1);
+  z-index: 2;
 }
 
-.locker-card.disponible  { background: #52c41a; }
-.locker-card.asignado    { background: #ff4d4f; }
-.locker-card.mantenimiento { background: #faad14; }
+.locker-card.clickable:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.14),
+    inset 2px 0 0 rgba(255,255,255,0.2),
+    inset -2px 0 0 rgba(0,0,0,0.1),
+    1px 1px 3px rgba(0,0,0,0.18);
+}
 
+/* ── Estados: color de la puerta ── */
+.locker-card.disponible {
+  background: linear-gradient(160deg, #d6e8f7 0%, #b8d4ee 60%, #a8c8e8 100%);
+}
+.locker-card.asignado {
+  background: linear-gradient(160deg, #2d5a9e 0%, #1a3d6e 60%, #142f56 100%);
+}
+.locker-card.mantenimiento {
+  background: linear-gradient(160deg, #ffe08a 0%, #fac130 60%, #e8a800 100%);
+}
+
+/* ── Número en la puerta ── */
+.locker-num {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.disponible    .locker-num { color: #1a4a7a; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+.asignado      .locker-num { color: #a8c8f0; text-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+.mantenimiento .locker-num { color: #7a4a00; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
+
+/* ── Manija (barra horizontal centrada) ── */
+.locker-pip {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.disponible    .locker-pip { background: #7aaee0; }
+.asignado      .locker-pip { background: #5a8fc4; }
+.mantenimiento .locker-pip { background: #c8860a; }
+
+/* Raya de bisagra (lado izquierdo) */
+.locker-card::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(0,0,0,0.12);
+  box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.15);
+}
+
+/* Ranura inferior de ventilación */
+.locker-card::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  right: 8px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 0 rgba(0,0,0,0.06), 0 -4px 0 rgba(0,0,0,0.04);
+}
+
+/* ── Icono wifi ── */
 .locker-wifi-icon {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  font-size: 12px;
+  top: 3px;
+  right: 3px;
+  font-size: 7px;
+  line-height: 1;
 }
 
-.piso-titulo {
-  font-weight: 600;
-  color: #003087;
-  margin: 12px 0 4px;
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .locker-card   { width: 32px; height: 44px; }
+  .locker-num    { font-size: 8px; }
+  .locker-grid   { gap: 5px; padding: 8px; }
+  .lkg-floor-mini { display: none; }
 }
