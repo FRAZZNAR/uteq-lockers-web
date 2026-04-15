@@ -143,13 +143,23 @@ const UsuariosPage = () => {
   ]
 
   // Campos de nombre compartidos entre crear y editar
-  const camposNombreEmail = (
+  const camposNombreEmail = (form: ReturnType<typeof Form.useForm>[0]) => (
     <>
       <Form.Item name="nombre" label="Nombre" rules={reglasSoloLetras}>
-        <Input placeholder="Solo letras" />
+        <Input placeholder="Solo letras"
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, '')
+            form.setFieldValue('nombre', e.target.value)
+          }}
+        />
       </Form.Item>
       <Form.Item name="apellido" label="Apellido" rules={reglasApellido}>
-        <Input placeholder="Solo letras" />
+        <Input placeholder="Solo letras"
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, '')
+            form.setFieldValue('apellido', e.target.value)
+          }}
+        />
       </Form.Item>
       <Form.Item name="email" label="Email" rules={[
         { required: true, type: 'email', message: 'Ingresa un email válido' },
@@ -158,7 +168,12 @@ const UsuariosPage = () => {
         <Input placeholder="usuario@uteq.edu.mx" />
       </Form.Item>
       <Form.Item name="matricula" label="Matrícula" rules={reglasMatricula}>
-        <Input placeholder="Ej. 2022371115" />
+        <Input placeholder="Ej. 2022371115"
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '')
+            form.setFieldValue('matricula', e.target.value)
+          }}
+        />
       </Form.Item>
       <Form.Item name="carrera" label="Carrera">
         <Input placeholder="Ej. Ingeniería en Tecnologías de la Información" />
@@ -187,7 +202,7 @@ const UsuariosPage = () => {
       <Modal title="Nuevo Usuario" open={modalCrear}
         onCancel={() => { setModalCrear(false); formCrear.resetFields() }} footer={null}>
         <Form form={formCrear} layout="vertical" onFinish={crear}>
-          {camposNombreEmail}
+          {camposNombreEmail(formCrear)}
           <Form.Item name="rol" label="Rol" rules={[{ required: true }]} initialValue="Alumno">
             <Select>
               <Option value="Admin">Admin</Option>
@@ -223,7 +238,7 @@ const UsuariosPage = () => {
         title={`Editar — ${usuarioEditar?.nombre ?? ''} ${usuarioEditar?.apellido ?? ''}`}
         open={!!usuarioEditar} onCancel={() => setUsuarioEditar(null)} footer={null}>
         <Form form={formEditar} layout="vertical" onFinish={editar}>
-          {camposNombreEmail}
+          {camposNombreEmail(formEditar)}
           <Form.Item name="password" label="Nueva contraseña (vacío = sin cambio)"
             rules={[
               { min: 8, message: 'Mínimo 8 caracteres' },

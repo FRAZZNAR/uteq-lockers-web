@@ -210,7 +210,8 @@ const TicketsMantenimientoPage = () => {
             rules={[
               { pattern: /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]+$/, message: 'Solo se permiten letras, sin números' },
             ]}>
-            <Input placeholder="Nombre del técnico o encargado" />
+            <Input placeholder="Nombre del técnico o encargado"
+              onChange={(e) => { e.target.value = e.target.value.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, '') }} />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>Crear Ticket</Button>
         </Form>
@@ -233,7 +234,8 @@ const TicketsMantenimientoPage = () => {
             rules={[
               { pattern: /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]+$/, message: 'Solo se permiten letras, sin números' },
             ]}>
-            <Input placeholder="Nombre del técnico o encargado" />
+            <Input placeholder="Nombre del técnico o encargado"
+              onChange={(e) => { e.target.value = e.target.value.replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, '') }} />
           </Form.Item>
           <Form.Item name="descripcion" label="Descripción" rules={[
             { required: true, message: 'La descripción es requerida' },
