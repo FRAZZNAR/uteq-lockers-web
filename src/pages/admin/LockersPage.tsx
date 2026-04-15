@@ -3,6 +3,7 @@ import { Table, Button, Tabs, Space, Select, Input, InputNumber, Tag, Modal, For
   message, Card, Alert } from 'antd'
 import { PlusOutlined, WifiOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
+import { useSearchParams } from 'react-router-dom'
 import api from '../../services/api'
 import LockerGrid from '../../components/LockerGrid/LockerGrid'
 import StatusBadge from '../../components/StatusBadge/StatusBadge'
@@ -12,13 +13,14 @@ const { TabPane } = Tabs
 const { Option } = Select
 
 const LockersPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabActiva = searchParams.get('edificio') ?? 'H'
   const [lockers, setLockers] = useState<Locker[]>([])
   const [edificios, setEdificios] = useState<Edificio[]>([])
   const [pisos, setPisos] = useState<Piso[]>([])
   const [mapaH, setMapaH] = useState<{ pisoNumero: number; lockers: LockerMapaItem[] }[]>([])
   const [mapaK, setMapaK] = useState<{ pisoNumero: number; lockers: LockerMapaItem[] }[]>([])
   const [cargando, setCargando] = useState(true)
-  const [tabActiva, setTabActiva] = useState('H')
   const [modalNuevo, setModalNuevo] = useState(false)
   const [modalDispositivo, setModalDispositivo] = useState(false)
   const [deviceKey, setDeviceKey] = useState('')
@@ -138,7 +140,7 @@ const LockersPage = () => {
         </Button>
       </Space>
 
-      <Tabs activeKey={tabActiva} onChange={setTabActiva}>
+      <Tabs activeKey={tabActiva} onChange={(key: string) => setSearchParams({ edificio: key })}>
         <TabPane tab="Edificio H" key="H">
           <Card title="Mapa visual" style={{ marginBottom: 16 }}>
             <LockerGrid pisos={mapaH} />
