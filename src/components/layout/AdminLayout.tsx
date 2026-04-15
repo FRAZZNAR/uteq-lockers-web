@@ -6,6 +6,7 @@ import {
   TeamOutlined, CreditCardOutlined, HistoryOutlined,
   FilePdfOutlined, LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
   DownOutlined as ChevronDownOutlined, BellOutlined, ToolOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons'
 import useAuth from '../../hooks/useAuth'
 import './AdminLayout.css'
@@ -34,6 +35,7 @@ const menuItems: MenuItem[] = [
   { key: '/admin/avisos', icon: <BellOutlined />, label: 'Avisos' },
   { key: '/admin/tickets', icon: <ToolOutlined />, label: 'Tickets Mantenimiento' },
   { key: '/admin/usuarios',     icon: <TeamOutlined />,       label: 'Usuarios' },
+  { key: '/admin/grupos',       icon: <UsergroupAddOutlined />, label: 'Grupos y Tutores' },
   { key: '/admin/tarjetas',     icon: <CreditCardOutlined />, label: 'Tarjetas RFID' },
   { key: '/admin/accesos',      icon: <HistoryOutlined />,    label: 'Historial Accesos' },
   { key: '/admin/reportes',     icon: <FilePdfOutlined />,    label: 'Reportes' },

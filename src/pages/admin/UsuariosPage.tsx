@@ -5,7 +5,7 @@ import { PlusOutlined, EditOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import api from '../../services/api'
-import type { Usuario } from '../../types'
+import type { Usuario, Grupo } from '../../types'
 
 const { Option } = Select
 
@@ -34,6 +34,7 @@ const reglasMatricula = [
 
 const UsuariosPage = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
+  const [grupos, setGrupos] = useState<Grupo[]>([])
   const [cargando, setCargando] = useState(true)
   const [modalCrear, setModalCrear] = useState(false)
   const [usuarioEditar, setUsuarioEditar] = useState<Usuario | null>(null)
@@ -43,8 +44,12 @@ const UsuariosPage = () => {
   const cargar = useCallback(async () => {
     setCargando(true)
     try {
-      const res = await api.usuarios.listar(1, 200)
-      setUsuarios(res.data.data ?? [])
+      const [usRes, grRes] = await Promise.all([
+        api.usuarios.listar(1, 200),
+        api.grupos.listar(),
+      ])
+      setUsuarios(usRes.data.data ?? [])
+      setGrupos(grRes.data.data ?? [])
     } finally { setCargando(false) }
   }, [])
 
@@ -53,7 +58,7 @@ const UsuariosPage = () => {
   const crear = async (values: {
     email: string; matricula: string; nombre: string;
     apellido: string; password: string; confirmar: string; rol: string;
-    carrera?: string; tutor?: string
+    carrera?: string; grupoId?: string
   }) => {
     if (values.password !== values.confirmar) {
       message.error('Las contraseñas no coinciden')
@@ -64,15 +69,17 @@ const UsuariosPage = () => {
         email: values.email, matricula: values.matricula,
         nombre: values.nombre, apellido: values.apellido,
         password: values.password, rol: values.rol as 'Admin' | 'Alumno',
-        carrera: values.carrera, tutor: values.tutor,
+        carrera: values.carrera, grupoId: values.grupoId,
       })
       message.success('Usuario creado')
       setModalCrear(false)
       formCrear.resetFields()
       cargar()
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { errors?: string[] } } })
-        ?.response?.data?.errors?.[0] ?? 'Error al crear usuario'
+      const msg = (err as { response?: { data?: { errors?: string[]; message?: string } } })
+        ?.response?.data?.errors?.[0]
+        ?? (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Error al crear usuario'
       message.error(msg)
     }
   }
@@ -81,14 +88,15 @@ const UsuariosPage = () => {
     formEditar.setFieldsValue({
       nombre: u.nombre, apellido: u.apellido,
       email: u.email, matricula: u.matricula,
-      carrera: u.carrera ?? '', tutor: u.tutor ?? '',
+      carrera: u.carrera ?? '',
+      grupoId: u.grupoId ?? null,
     })
     setUsuarioEditar(u)
   }
 
   const editar = async (values: {
     nombre: string; apellido: string; email: string;
-    matricula: string; carrera?: string; tutor?: string; password?: string
+    matricula: string; carrera?: string; grupoId?: string; password?: string
   }) => {
     if (!usuarioEditar) return
     try {
@@ -96,15 +104,17 @@ const UsuariosPage = () => {
         nombre: values.nombre, apellido: values.apellido,
         email: values.email, matricula: values.matricula,
         carrera: values.carrera || undefined,
-        tutor: values.tutor || undefined,
+        grupoId: values.grupoId || null,
         password: values.password || undefined,
       })
       message.success('Usuario actualizado')
       setUsuarioEditar(null)
       cargar()
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { errors?: string[] } } })
-        ?.response?.data?.errors?.[0] ?? 'Error al actualizar usuario'
+      const msg = (err as { response?: { data?: { errors?: string[]; message?: string } } })
+        ?.response?.data?.errors?.[0]
+        ?? (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Error al actualizar usuario'
       message.error(msg)
     }
   }
@@ -123,8 +133,12 @@ const UsuariosPage = () => {
     { title: 'Email', dataIndex: 'email', key: 'email' },
     { title: 'Carrera', dataIndex: 'carrera', key: 'carrera', ellipsis: true,
       render: (v?: string) => v ?? '—' },
-    { title: 'Tutor (email)', dataIndex: 'tutor', key: 'tutor', ellipsis: true,
-      render: (v?: string) => v ?? '—' },
+    { title: 'Grupo', dataIndex: 'grupoNombre', key: 'grupo', width: 100,
+      render: (v?: string) => v ? <Tag color="blue">{v}</Tag> : '—' },
+    { title: 'Tutor', key: 'tutor', ellipsis: true,
+      render: (_, r) => r.tutorNombre
+        ? <span title={r.tutorEmail}>{r.tutorNombre}</span>
+        : '—' },
     { title: 'Rol', dataIndex: 'rol', key: 'rol', width: 80,
       render: (v: string) => <Tag color={v === 'Admin' ? 'blue' : 'green'}>{v}</Tag> },
     { title: 'Creado', dataIndex: 'creadoEn', key: 'creado', width: 110,
@@ -134,7 +148,7 @@ const UsuariosPage = () => {
       render: (_, r) => (
         <Space size="small">
           <Button size="small" icon={<EditOutlined />} onClick={() => abrirEditar(r)}>Editar</Button>
-          <Popconfirm title="¿Eliminar usuario?" onConfirm={() => eliminar(r.id)} okText="Sí">
+          <Popconfirm title="¿Eliminar usuario permanentemente?" onConfirm={() => eliminar(r.id)} okText="Sí" okButtonProps={{ danger: true }}>
             <Button size="small" danger>Eliminar</Button>
           </Popconfirm>
         </Space>
@@ -142,7 +156,6 @@ const UsuariosPage = () => {
     },
   ]
 
-  // Campos de nombre compartidos entre crear y editar
   const camposNombreEmail = (form: ReturnType<typeof Form.useForm>[0]) => (
     <>
       <Form.Item name="nombre" label="Nombre" rules={reglasSoloLetras}>
@@ -178,9 +191,17 @@ const UsuariosPage = () => {
       <Form.Item name="carrera" label="Carrera">
         <Input placeholder="Ej. Ingeniería en Tecnologías de la Información" />
       </Form.Item>
-      <Form.Item name="tutor" label="Correo del Tutor"
-        rules={[{ type: 'email', message: 'Ingresa un correo válido' }]}>
-        <Input placeholder="tutor@uteq.edu.mx" />
+      <Form.Item name="grupoId" label="Grupo">
+        <Select placeholder="Seleccionar grupo (opcional)" allowClear showSearch
+          filterOption={(input, option) =>
+            String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+          }>
+          {grupos.map((g) => (
+            <Option key={g.id} value={g.id}>
+              {g.nombre} — {g.tutorNombre}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
     </>
   )
