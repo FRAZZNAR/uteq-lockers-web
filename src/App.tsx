@@ -16,6 +16,7 @@ const TarjetasRfidPage = lazy(() => import('./pages/admin/TarjetasRfidPage'))
 const AccesosPage = lazy(() => import('./pages/admin/AccesosPage'))
 const ReportesPage = lazy(() => import('./pages/admin/ReportesPage'))
 const AvisosPage = lazy(() => import('./pages/admin/AvisosPage'))
+const TicketsMantenimientoPage = lazy(() => import('./pages/admin/TicketsMantenimientoPage'))
 const MiLockerPage = lazy(() => import('./pages/alumno/MiLockerPage'))
 const SolicitarCodigoPage = lazy(() => import('./pages/alumno/SolicitarCodigoPage'))
 const HistorialPage = lazy(() => import('./pages/alumno/HistorialPage'))
@@ -81,6 +82,7 @@ const App = () => {
             <Route path="accesos" element={<AccesosPage />} />
             <Route path="reportes" element={<ReportesPage />} />
             <Route path="avisos" element={<AvisosPage />} />
+            <Route path="tickets" element={<TicketsMantenimientoPage />} />
           </Route>
 
           {/* Portal Alumno */}

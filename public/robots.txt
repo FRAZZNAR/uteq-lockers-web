@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /alumno/
+Allow: /login
+Allow: /
+
+Sitemap: /sitemap.xml

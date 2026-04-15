@@ -40,7 +40,7 @@ const AvisosPage = () => {
         diasLimite: values.diasLimite,
         mensaje: values.mensaje,
       })
-      message.success('Aviso enviado al alumno correctamente')
+      message.success('Aviso enviado al alumno y al tutor correctamente')
       setModal(false)
       form.resetFields()
       cargar()
@@ -65,6 +65,16 @@ const AvisosPage = () => {
       render: (_, r) => `${r.estudianteNombre} (${r.estudianteMatricula})`,
     },
     {
+      title: 'Carrera', dataIndex: 'estudianteCarrera', key: 'carrera',
+      render: (v?: string) => v ?? '—',
+      ellipsis: true,
+    },
+    {
+      title: 'Tutor', dataIndex: 'tutorEmail', key: 'tutor',
+      render: (v?: string) => v ?? '—',
+      ellipsis: true,
+    },
+    {
       title: 'Locker', key: 'locker',
       render: (_, r) => `Edif. ${r.edificioNombre} · ${r.pisoDescripcion ?? ''} · #${r.lockerNumero}`,
     },
@@ -77,10 +87,13 @@ const AvisosPage = () => {
       },
     },
     {
-      title: 'Estado', dataIndex: 'estado', key: 'estado',
-      render: (v: string) => (
-        <Tag color={v === 'Cumplido' ? 'green' : 'orange'}>{v}</Tag>
-      ),
+      title: 'Estado', key: 'estado',
+      render: (_, r) => {
+        const vencido = r.estado === 'Pendiente' && dayjs(r.fechaLimite).isBefore(dayjs())
+        if (r.estado === 'Cumplido') return <Tag color="green">Cumplido</Tag>
+        if (vencido) return <Tag color="red">Vencido</Tag>
+        return <Tag color="orange">Pendiente</Tag>
+      },
     },
     { title: 'Mensaje', dataIndex: 'mensaje', key: 'mensaje', ellipsis: true },
     {
@@ -104,6 +117,7 @@ const AvisosPage = () => {
       <Table
         columns={columnas} dataSource={avisos} rowKey="id"
         loading={cargando} size="small" pagination={{ pageSize: 20 }}
+        scroll={{ x: true }}
       />
 
       <Modal title={<Space><BellOutlined />Enviar Aviso de Desocupación</Space>}

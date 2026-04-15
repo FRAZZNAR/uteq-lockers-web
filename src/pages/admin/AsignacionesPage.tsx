@@ -15,25 +15,35 @@ const AsignacionesPage = () => {
   const [alumnos, setAlumnos] = useState<Usuario[]>([])
   const [lockersDisp, setLockersDisp] = useState<Locker[]>([])
   const [modal, setModal] = useState(false)
+  const [cargandoModal, setCargandoModal] = useState(false)
   const [form] = Form.useForm()
 
   const cargar = useCallback(async () => {
     setCargando(true)
     try {
-      const [asigRes, alumnosRes, lockRes] = await Promise.all([
+      const [asigRes, alumnosRes] = await Promise.all([
         api.asignaciones.listar(),
         api.usuarios.listarAlumnos(),
-        api.lockers.listar({ pageSize: 200 }),
       ])
       setAsignaciones(asigRes.data.data ?? [])
       setAlumnos(alumnosRes.data.data ?? [])
-      setLockersDisp((lockRes.data.data ?? []).filter((l: Locker) => l.estado === 'Disponible'))
     } finally {
       setCargando(false)
     }
   }, [])
 
   useEffect(() => { cargar() }, [cargar])
+
+  const abrirModal = async () => {
+    setModal(true)
+    setCargandoModal(true)
+    try {
+      const res = await api.lockers.disponibles()
+      setLockersDisp(res.data.data ?? [])
+    } finally {
+      setCargandoModal(false)
+    }
+  }
 
   const crear = async (values: {
     lockerId: string; estudianteId: string;
@@ -114,7 +124,7 @@ const AsignacionesPage = () => {
   return (
     <div>
       <Button type="primary" icon={<PlusOutlined />}
-        onClick={() => setModal(true)} style={{ marginBottom: 16 }}>
+        onClick={abrirModal} style={{ marginBottom: 16 }}>
         Nueva Asignación
       </Button>
 
@@ -125,7 +135,7 @@ const AsignacionesPage = () => {
       />
 
       <Modal title="Nueva Asignación" open={modal}
-        onCancel={() => setModal(false)} footer={null}>
+        onCancel={() => { setModal(false); form.resetFields() }} footer={null}>
         <Form form={form} layout="vertical" onFinish={crear}>
           <Form.Item name="estudianteId" label="Alumno" rules={[{ required: true }]}>
             <Select showSearch placeholder="Buscar alumno"
@@ -140,7 +150,7 @@ const AsignacionesPage = () => {
             </Select>
           </Form.Item>
           <Form.Item name="lockerId" label="Locker disponible" rules={[{ required: true }]}>
-            <Select showSearch placeholder="Seleccionar locker"
+            <Select showSearch placeholder="Seleccionar locker" loading={cargandoModal}
               filterOption={(input, option) =>
                 String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())
               }>
@@ -152,10 +162,23 @@ const AsignacionesPage = () => {
             </Select>
           </Form.Item>
           <Form.Item name="fechaInicio" label="Fecha Inicio"
-            initialValue={dayjs()} rules={[{ required: true }]}>
+            initialValue={dayjs()} rules={[{ required: true, message: 'La fecha de inicio es requerida' }]}>
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
           </Form.Item>
-          <Form.Item name="fechaFin" label="Fecha Fin (opcional)">
+          <Form.Item name="fechaFin" label="Fecha Fin (opcional)"
+            dependencies={['fechaInicio']}
+            rules={[
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value) return Promise.resolve()
+                  const inicio = getFieldValue('fechaInicio')
+                  if (inicio && value.isBefore(inicio, 'day')) {
+                    return Promise.reject(new Error('La fecha fin debe ser posterior a la fecha de inicio'))
+                  }
+                  return Promise.resolve()
+                },
+              }),
+            ]}>
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>Crear Asignación</Button>

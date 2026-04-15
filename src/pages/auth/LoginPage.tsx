@@ -32,6 +32,14 @@ const LoginPage = () => {
   // Paso 1: solicitar código 2FA
   const onSubmitCredenciales = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.toLowerCase().endsWith('@uteq.edu.mx')) {
+      message.error('Solo se aceptan correos institucionales (@uteq.edu.mx)');
+      return;
+    }
+    if (password.length < 8) {
+      message.error('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
     setCargando(true);
     try {
       const res = await api.auth.solicitarCodigo({ email, password });

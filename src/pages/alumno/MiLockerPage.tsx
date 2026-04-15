@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Result, Button, Descriptions, Tag, Space, Modal, Input, message, notification } from 'antd'
+import { Card, Result, Button, Descriptions, Tag, Space, Modal, Input, Form, message, notification } from 'antd'
 import { LockOutlined, MailOutlined, WifiOutlined, ToolOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import api from '../../services/api'
@@ -14,6 +14,7 @@ const MiLockerPage = () => {
   const [tarjetas, setTarjetas] = useState<TarjetaRfid[]>([])
   const [cargando, setCargando] = useState(true)
   const [modalReporte, setModalReporte] = useState(false)
+  const [formReporte] = Form.useForm()
   const { usuario } = useAuth()
   const navigate = useNavigate()
 
@@ -130,12 +131,21 @@ const MiLockerPage = () => {
       <Modal
         title="Reportar problema"
         open={modalReporte}
-        onCancel={() => setModalReporte(false)}
-        onOk={() => { message.success('Reporte enviado'); setModalReporte(false) }}
+        onCancel={() => { setModalReporte(false); formReporte.resetFields() }}
+        onOk={() => formReporte.submit()}
         okText="Enviar"
       >
-        <p>Describe el problema con tu locker:</p>
-        <Input.TextArea rows={4} placeholder="Ej: El locker no abre correctamente..." />
+        <Form form={formReporte} layout="vertical"
+          onFinish={() => { message.success('Reporte enviado'); setModalReporte(false); formReporte.resetFields() }}>
+          <Form.Item name="descripcion" label="Describe el problema con tu locker" rules={[
+            { required: true, message: 'Por favor describe el problema' },
+            { min: 10, message: 'Mínimo 10 caracteres' },
+            { whitespace: true, message: 'No puede estar vacío' },
+          ]}>
+            <Input.TextArea rows={4} maxLength={500} showCount
+              placeholder="Ej: El locker no abre correctamente..." />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )

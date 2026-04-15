@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Table, Button, Tabs, Space, Select, Input, Tag, Modal, Form,
+import { Table, Button, Tabs, Space, Select, Input, InputNumber, Tag, Modal, Form,
   message, Card, Alert } from 'antd'
 import { PlusOutlined, WifiOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -173,10 +173,18 @@ const LockersPage = () => {
               ))}
             </Select>
           </Form.Item>
-          <Form.Item name="numero" label="Número" rules={[{ required: true }]}>
-            <Input type="number" />
+          <Form.Item name="numero" label="Número" rules={[
+            { required: true, message: 'El número es requerido' },
+            { type: 'number', min: 1, message: 'Debe ser un número mayor a 0' },
+          ]}>
+            <InputNumber min={1} precision={0} style={{ width: '100%' }}
+              placeholder="Ej. 1" />
           </Form.Item>
-          <Form.Item name="numeroSerie" label="Número de Serie" rules={[{ required: true }]}>
+          <Form.Item name="numeroSerie" label="Número de Serie" rules={[
+            { required: true, message: 'El número de serie es requerido' },
+            { pattern: /^[A-Za-z0-9\-_]+$/, message: 'Solo letras, números y guiones (sin espacios)' },
+            { min: 3, message: 'Mínimo 3 caracteres' },
+          ]}>
             <Input placeholder="EDI-H-P1-L01" />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>Crear</Button>
