@@ -281,7 +281,7 @@ const reportes = {
 const dashboard = {
   stats: async (cancelToken?: CancelTokenSource) => {
     const [lockersRes, accesosFallidosRes] = await Promise.all([
-      lockers.listar(undefined, cancelToken),
+      lockers.listar({ pageSize: 500 }, cancelToken),
       accesos.fallidos(cancelToken),
     ])
     const ls = lockersRes.data.data ?? []
