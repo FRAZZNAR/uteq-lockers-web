@@ -8,6 +8,15 @@ export type EstadoDispositivo = 'Online' | 'Offline'
 export type TipoTicket = 'Alta' | 'Baja' | 'Cambio'
 export type EstadoTicket = 'Abierto' | 'EnProceso' | 'Cerrado'
 
+export interface Grupo {
+  id: string
+  nombre: string
+  tutorNombre: string
+  tutorEmail: string
+  totalEstudiantes: number
+  creadoEn: string
+}
+
 export interface Usuario {
   id: string
   email: string
@@ -16,7 +25,10 @@ export interface Usuario {
   apellido: string
   rol: Rol
   carrera?: string
-  tutor?: string
+  grupoId?: string
+  grupoNombre?: string
+  tutorNombre?: string
+  tutorEmail?: string
   creadoEn: string
 }
 
@@ -155,6 +167,8 @@ export interface Aviso {
   estudianteMatricula: string
   estudianteEmail: string
   estudianteCarrera?: string
+  grupoNombre?: string
+  tutorNombre?: string
   tutorEmail?: string
   mensaje: string
   fechaLimite: string
@@ -196,7 +210,7 @@ export interface CrearUsuarioDto {
   password: string
   rol: Rol
   carrera?: string
-  tutor?: string
+  grupoId?: string
 }
 
 export interface ActualizarUsuarioDto {
@@ -206,7 +220,7 @@ export interface ActualizarUsuarioDto {
   matricula?: string
   password?: string
   carrera?: string
-  tutor?: string
+  grupoId?: string | null
 }
 
 export interface TicketMantenimiento {

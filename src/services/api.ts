@@ -7,6 +7,7 @@ import type {
   TarjetaRfid, EnrolarTarjetaDto,
   GenerarCodigoDto, Dispositivo,
   Aviso, CrearAvisoDto,
+  Grupo,
   SolicitarCodigoLoginDto, SolicitarCodigoLoginResponseDto, VerificarCodigoLoginDto,
   TicketMantenimiento, CrearTicketMantenimientoDto, ActualizarTicketMantenimientoDto,
 } from '../types'
@@ -237,6 +238,20 @@ const dispositivos = {
     api.delete<ServiceResponse<boolean>>(`/dispositivos/${id}`),
 }
 
+// ── Grupos ────────────────────────────────────────────────────────────
+const grupos = {
+  listar: (cancelToken?: CancelTokenSource) =>
+    api.get<ServiceResponse<Grupo[]>>('/grupos', { cancelToken: cancelToken?.token }),
+  obtener: (id: string) =>
+    api.get<ServiceResponse<Grupo>>(`/grupos/${id}`),
+  crear: (dto: { nombre: string; tutorNombre: string; tutorEmail: string }) =>
+    api.post<ServiceResponse<Grupo>>('/grupos', dto),
+  actualizar: (id: string, dto: { nombre?: string; tutorNombre?: string; tutorEmail?: string }) =>
+    api.put<ServiceResponse<Grupo>>(`/grupos/${id}`, dto),
+  eliminar: (id: string) =>
+    api.delete<ServiceResponse<boolean>>(`/grupos/${id}`),
+}
+
 // ── Avisos ────────────────────────────────────────────────────────────
 const avisos = {
   listar: (cancelToken?: CancelTokenSource) =>
@@ -315,5 +330,6 @@ export default {
   reportes,
   avisos,
   tickets,
+  grupos,
   dashboard,
 }
